@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Oracle ∞</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0620">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="The Oracle">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,300;0,500;1,300&display=swap">
+<style>
+:root{--void:#0a0620;--mist:#e9e4ff;--dim:#a79fd0;--aurora:#5df2d6;--arcane:#b46bff;--ember:#ffc86b;--blood:#ff6b9d;--glass:rgba(24,14,60,.62);--edge:rgba(180,107,255,.4)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--void);color:var(--mist);font:300 1.06rem/1.55 "Spectral",Georgia,serif;overflow-x:hidden;min-height:100vh}
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+#scene{position:fixed;inset:0;z-index:1;perspective:900px;pointer-events:none;overflow:hidden}
+#world{position:absolute;left:50%;top:50%;transform-style:preserve-3d}
+.o{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.cube{position:absolute;transform-style:preserve-3d;animation:cs 26s linear infinite}
+.f{position:absolute;inset:0;border:1px solid var(--arcane);background:rgba(180,107,255,.07);box-shadow:inset 0 0 40px rgba(93,242,214,.25),0 0 20px rgba(180,107,255,.3)}
+.f:nth-child(1){transform:translateZ(var(--h))}.f:nth-child(2){transform:rotateY(90deg) translateZ(var(--h))}.f:nth-child(3){transform:rotateY(180deg) translateZ(var(--h))}
+.f:nth-child(4){transform:rotateY(-90deg) translateZ(var(--h))}.f:nth-child(5){transform:rotateX(90deg) translateZ(var(--h))}.f:nth-child(6){transform:rotateX(-90deg) translateZ(var(--h))}
+.ring{position:absolute;border-radius:50%;border:2px solid var(--aurora);box-shadow:0 0 30px var(--aurora),inset 0 0 30px var(--aurora);opacity:.45}
+@keyframes cs{from{transform:rotateX(20deg) rotateY(0)}to{transform:rotateX(20deg) rotateY(360deg)}}
+@keyframes r1{from{transform:rotateX(70deg) rotateZ(0)}to{transform:rotateX(70deg) rotateZ(360deg)}}
+@keyframes r2{from{transform:rotateY(70deg) rotateZ(0)}to{transform:rotateY(70deg) rotateZ(-360deg)}}
+body[data-gfx=low] #scene,body.rm #scene{display:none}body[data-gfx=med] .rg{display:none}
+#flash{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(93,242,214,.5),rgba(180,107,255,.3) 45%,transparent 70%)}
+#flash.on{animation:fa .7s}@keyframes fa{30%{opacity:.5}to{opacity:0}}
+main{position:relative;z-index:2;max-width:740px;margin:0 auto;padding:2rem 1rem 3rem}
+h1,h2,h3{font-family:"Cinzel",Georgia,serif;font-weight:700;letter-spacing:.06em;text-align:center}
+h1{font-size:clamp(2rem,7vw,3rem);background:linear-gradient(90deg,var(--aurora),var(--arcane),var(--ember),var(--aurora));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fl 9s linear infinite;filter:drop-shadow(0 0 14px rgba(180,107,255,.6))}
+@keyframes fl{to{background-position:300% 0}}
+h2{font-size:1.3rem;color:var(--ember);text-shadow:0 0 12px rgba(255,200,107,.5);margin-bottom:.6rem}
+h3{font-size:1rem;color:var(--aurora);text-align:left;margin:1.2rem 0 .3rem}
+.sub{text-align:center;color:var(--dim);font-style:italic;margin:.4rem 0 1.5rem}
+#tilt{perspective:1000px}
+#app{background:var(--glass);border:1px solid var(--edge);border-radius:20px;padding:1.5rem;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 0 50px rgba(120,60,255,.3),inset 0 0 30px rgba(93,242,214,.06);animation:en .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes en{from{opacity:0;filter:blur(8px);transform:rotateY(-24deg) translateZ(-140px) scale(.94)}to{opacity:1;filter:none;transform:none}}
+button{font:inherit;font-weight:500;color:var(--mist);cursor:pointer;position:relative;background:rgba(60,35,130,.45);border:1px solid var(--edge);border-radius:14px;padding:.85rem 1.05rem;transition:transform .25s,box-shadow .25s,border-color .25s}
+button:hover:not(:disabled),button:focus-visible{border-color:var(--aurora);box-shadow:0 0 24px rgba(93,242,214,.45);transform:translateY(-3px) scale(1.02)}
+:focus-visible{outline:3px solid var(--ember);outline-offset:3px}
+h2:focus-visible,.q:focus-visible,#app:focus-visible{outline:none}
+button:disabled{cursor:default}
+button.sel{border-color:var(--c,var(--ember));background:rgba(255,255,255,.1);box-shadow:0 0 26px var(--c,var(--ember))}
+.menu{display:grid;gap:.9rem;margin:1rem 0}
+.menu button{text-align:left;display:flex;gap:1rem;align-items:center}
+.ic{font-size:1.9rem;filter:drop-shadow(0 0 10px var(--arcane))}
+small{display:block;color:var(--dim);font-weight:300;font-size:.88rem}
+.cta{display:block;width:100%;margin-top:1rem;text-align:center;background:linear-gradient(135deg,#6a2fd6,#1fa8a0);border:0;font-family:"Cinzel",serif;letter-spacing:.08em;box-shadow:0 0 24px rgba(180,107,255,.5)}
+.cta:disabled{opacity:.4}
+.ghost{background:none;font-size:.9rem;padding:.4rem .8rem;margin-top:.8rem}
+.bar,.tb{height:6px;border-radius:6px;background:rgba(255,255,255,.1);margin-bottom:1rem;overflow:hidden}
+.bar i,.tb i{display:block;height:100%;background:linear-gradient(90deg,var(--arcane),var(--aurora));box-shadow:0 0 12px var(--aurora);transition:width .5s}
+.tb i{width:100%;transition:none;background:linear-gradient(90deg,var(--ember),var(--aurora))}
+.meta{display:flex;justify-content:space-between;color:var(--dim);font-size:.9rem}
+.q{font-size:1.2rem;margin:.6rem 0 1rem;text-align:center}
+.seq{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;margin-bottom:1.2rem}
+.mx{display:grid;grid-template-columns:repeat(3,64px);gap:.4rem;justify-content:center;margin-bottom:1.2rem}.mx .cell{width:64px;height:64px}
+.cell{width:84px;height:84px;display:grid;place-items:center;border-radius:14px;background:rgba(8,4,26,.6);border:1px solid var(--edge);box-shadow:0 0 18px rgba(180,107,255,.2);animation:pop .6s both}
+.cell svg{max-width:100%;max-height:100%;filter:drop-shadow(0 0 6px currentColor)}
+.cell:nth-child(2){animation-delay:.08s}.cell:nth-child(3){animation-delay:.16s}.cell:nth-child(4){animation-delay:.24s}.cell:nth-child(5){animation-delay:.32s}
+@keyframes pop{from{opacity:0;transform:translateZ(-200px) rotateX(60deg)}to{opacity:1;transform:none}}
+.cell.qm{font:700 2rem "Cinzel",serif;color:var(--ember);border-color:var(--ember);animation:pop .6s .4s both,pl 1.8s 1s infinite}
+@keyframes pl{50%{box-shadow:0 0 30px var(--ember)}}
+.num{font:700 1.4rem "Cinzel",serif;color:var(--aurora);text-shadow:0 0 12px var(--aurora)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}
+.opt{display:grid;place-items:center;padding:.5rem;min-height:88px}
+.opt.ok{border-color:var(--aurora);box-shadow:0 0 30px var(--aurora);background:rgba(31,168,160,.3)}
+.opt.no{border-color:var(--blood);box-shadow:0 0 30px var(--blood);animation:sh .4s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.hint-b{background:none;font-size:.9rem;display:block;margin:1rem auto 0}
+.fb{text-align:center;margin-top:1rem}.fb p{color:var(--dim);font-style:italic;font-size:.95rem}
+.ok-t{color:var(--aurora);text-shadow:0 0 12px var(--aurora)}.no-t{color:var(--blood);text-shadow:0 0 12px var(--blood)}
+.big{font:700 clamp(2.6rem,12vw,4.2rem) "Cinzel",serif;text-align:center;color:var(--ember);text-shadow:0 0 30px rgba(255,200,107,.75)}
+.stats{display:flex;justify-content:center;gap:1.2rem;color:var(--dim);flex-wrap:wrap;font-size:.95rem}.stats b{color:var(--mist);font-weight:500}
+.note{color:var(--dim);font-size:.85rem;text-align:center;margin-top:1rem;font-style:italic}
+.chk{display:flex;gap:.7rem;align-items:center;margin:.8rem 0;font-size:.95rem}.chk input{accent-color:var(--arcane);width:18px;height:18px}.chk input[type=range]{width:100%}
+.lk{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-top:1.2rem}.lk button{padding:.7rem .3rem;font-size:.82rem;text-align:center;min-height:62px}
+.ax{display:grid;grid-template-columns:1.6rem 1fr 1.6rem;gap:.6rem;align-items:center;margin-top:.9rem;font-family:"Cinzel",serif;color:var(--ember)}
+.ax span:last-child{text-align:right}.ax div{height:12px;border-radius:12px;background:rgba(255,255,255,.1);overflow:hidden;display:flex}
+.ax i{display:block;height:100%;transition:width 1.2s .3s}.ax i:first-child{background:linear-gradient(90deg,var(--arcane),#d9a6ff)}.ax i:last-child{background:linear-gradient(90deg,#7ff7e3,var(--aurora))}
+details{margin:.3rem 0;color:var(--dim);font-size:.92rem}summary{cursor:pointer;color:var(--mist)}details li{margin:.3rem 0 0 1.2rem}
+.rep p,.rep li{font-size:.98rem;margin:.3rem 0}.rep ul{margin-left:1.2rem}
+.warn{border:1px solid var(--edge);border-radius:12px;padding:.8rem 1rem;color:var(--dim);font-size:.9rem;margin-top:1rem;background:rgba(0,0,0,.2)}
+svg.radar text{fill:var(--mist);font:600 13px "Cinzel",serif}
+.gear{position:fixed;top:12px;right:12px;z-index:5;width:46px;height:46px;border-radius:50%;padding:0;font-size:1.3rem}
+#set{position:fixed;inset:0;z-index:10;display:none;place-items:center;background:rgba(5,2,18,.75);backdrop-filter:blur(6px);padding:1rem}#set.open{display:grid}
+.panel{background:#150c38;border:1px solid var(--edge);border-radius:20px;padding:1.5rem;width:100%;max-width:400px;box-shadow:0 0 60px rgba(120,60,255,.4)}
+.seg{display:flex;gap:.4rem;margin:.4rem 0}.seg button{flex:1;padding:.5rem}.lab{color:var(--dim);font-size:.9rem;margin-top:.8rem}
+#app.quick{animation-duration:.35s}
+.load{display:flex;gap:.8rem;align-items:center;justify-content:center;padding:2rem;color:var(--dim)}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--edge);border-top-color:var(--aurora);animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin:1rem 0}.chips span{border:1px solid var(--edge);border-radius:999px;padding:.25rem .8rem;font-size:.88rem;color:var(--dim)}
+.exit{padding:.15rem .6rem;font-size:.8rem;margin-left:.5rem;background:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.6rem}
+.rep ol li{margin:.5rem 0}
+body.rm *{animation:none!important;transition:none!important}
+@media(max-width:520px){.cell{width:58px;height:58px}.lk{grid-template-columns:1fr}.lk button{min-height:0}.grid{gap:.45rem}}
+
+/* ===== v5: hub, games, RTL ===== */
+.langbar{display:flex;gap:.4rem;justify-content:center;margin-bottom:1rem}.langbar button{padding:.3rem .9rem;font-size:.85rem;border-radius:999px}
+.gm{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin:1rem 0}
+.gm button{display:block;text-align:start;min-height:128px}.gm .ic{display:block;margin-bottom:.3rem;font-size:1.7rem}
+.gm b{font-family:"Cinzel",serif;font-size:.92rem;display:block}.gm small{margin-top:.25rem}.gm em{display:block;color:var(--ember);font-style:normal;font-size:.8rem;margin-top:.4rem}
+.menu button{text-align:start}.ltr{direction:ltr;unicode-bidi:isolate}
+.seq,.mx,.num,.big{direction:ltr}
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:380px;margin:1rem auto}
+.mc{aspect-ratio:1;font-size:1.9rem;padding:0;background:none;border:0;perspective:600px}
+.mc i{position:absolute;inset:0;display:grid;place-items:center;border-radius:14px;border:1px solid var(--edge);backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .45s;font-style:normal}
+.mc .bk{background:linear-gradient(135deg,#2b1665,#143a55)}.mc .fr{transform:rotateY(180deg);background:rgba(8,4,26,.85)}
+.mc.up .bk{transform:rotateY(180deg)}.mc.up .fr{transform:none}.mc.ok .fr{border-color:var(--aurora);box-shadow:0 0 20px var(--aurora)}
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;max-width:320px;margin:1rem auto}
+.pad{aspect-ratio:1;border-radius:22px;background:var(--p);color:var(--p);opacity:.5;padding:0;border:2px solid transparent}
+.pad.lit{opacity:1;box-shadow:0 0 44px currentColor;transform:scale(1.05)}
+.tiles{display:grid;gap:.4rem;max-width:340px;margin:1rem auto}.tile{aspect-ratio:1;font:700 1.5rem "Cinzel",serif;padding:0}.tile.blank{visibility:hidden}
+.lights{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;max-width:340px;margin:1rem auto}
+.lt{aspect-ratio:1;padding:0;border-radius:12px;background:rgba(8,4,26,.7)}.lt.on{background:radial-gradient(circle,#ffe9a8,var(--ember));box-shadow:0 0 22px var(--ember)}
+.react{width:100%;min-height:220px;border-radius:20px;font:700 1.3rem "Cinzel",serif;margin-top:.5rem;padding:1rem}
+.react.wait{background:rgba(255,107,157,.25);border-color:var(--blood)}.react.go{background:rgba(93,242,214,.45);border-color:var(--aurora);box-shadow:0 0 50px var(--aurora)}
+.gear{right:auto;inset-inline-end:12px}
+.meta+.bar{margin-top:.25rem}.meta b{color:var(--mist);font-weight:500}
+[dir=rtl] .ax span:last-child{text-align:left}[dir=rtl] .ax span:first-child{text-align:right}
+[lang=ar] body,[lang=ar] button,[lang=ar] input,[lang=ar] h2,[lang=ar] h3,[lang=ar] .cta,[lang=ar] .gm b,[lang=ar] .react{font-family:"Cairo","Segoe UI",Tahoma,sans-serif;letter-spacing:0}
+[lang=ar] body{line-height:1.75}
+@media(max-width:520px){.gm{grid-template-columns:1fr}.gm button{min-height:0}}
+
+/* ===== v6: progression, dialogs, a11y ===== */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button{touch-action:manipulation}
+.player{border:1px solid var(--edge);border-radius:16px;padding:.8rem 1rem;background:rgba(8,4,26,.45);margin-bottom:.8rem}
+.player .bar{margin:.4rem 0 0}.meta{gap:.6rem}.stats b,.meta b,.big{unicode-bidi:isolate}
+.daily{display:flex;justify-content:space-between;align-items:center;gap:.8rem;border:1px solid var(--edge);border-radius:16px;padding:.8rem 1rem;margin-bottom:1rem;background:linear-gradient(135deg,rgba(106,47,214,.25),rgba(31,168,160,.18))}
+.daily small{display:block;color:var(--dim);font-size:.88rem}.daily button{flex:none}
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin:.8rem 0}
+.sg div{border:1px solid var(--edge);border-radius:12px;padding:.6rem .8rem;background:rgba(8,4,26,.4)}.sg b{display:block;font-size:1.3rem;color:var(--ember);font-weight:500}
+.rw{margin:.6rem 0}.rw p{margin:.2rem 0}.xp{color:var(--ember);font-weight:500;font-size:1.1rem}
+.alist,.hlist{list-style:none;padding:0;margin:.4rem 0}.alist{display:grid;gap:.5rem}
+.alist li{display:flex;gap:.7rem;align-items:center;border:1px solid var(--edge);border-radius:12px;padding:.5rem .8rem;opacity:.55}
+.alist li.on{opacity:1;border-color:var(--ember)}.alist li>span{font-size:1.5rem}.alist li div{flex:1}.alist b{font-weight:500}.alist em{font-style:normal;color:var(--dim);font-size:.8rem}
+.hlist li{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;border-bottom:1px solid rgba(180,107,255,.15);padding:.35rem 0;font-size:.9rem}.hlist em{font-style:normal;color:var(--ember)}
+.hintline{text-align:center;color:var(--dim);font-size:.9rem;margin:.4rem 0 .8rem}
+#toasts{position:fixed;inset-inline:0;bottom:14px;z-index:12;display:flex;flex-direction:column;align-items:center;gap:.5rem;pointer-events:none}
+.toast{background:#150c38;border:1px solid var(--ember);border-radius:12px;padding:.5rem 1rem;box-shadow:0 0 24px rgba(255,200,107,.35);animation:en .4s both;max-width:90vw;text-align:center}
+#dlg{position:fixed;inset:0;z-index:11;display:none;place-items:center;background:rgba(5,2,18,.78);backdrop-filter:blur(6px);padding:1rem}#dlg.open{display:grid}
+@media(max-width:520px){.daily{flex-direction:column;align-items:stretch;text-align:center}}
+</style>
+</head>
+<body data-gfx="high">
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="scene" aria-hidden="true"><div id="world">
+  <div class="o" data-b="-440,-150,-300" data-d="1"><div class="cube" style="--h:110px;width:220px;height:220px;left:-110px;top:-110px"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></div></div>
+  <div class="o" data-b="460,180,-180" data-d="1.8"><div class="cube" style="--h:70px;width:140px;height:140px;left:-70px;top:-70px;animation-duration:18s;animation-direction:reverse"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></div></div>
+  <div class="o rg" data-b="0,0,-520" data-d=".5">
+    <div class="ring" style="width:900px;height:900px;left:-450px;top:-450px;animation:r1 40s linear infinite"></div>
+    <div class="ring" style="width:680px;height:680px;left:-340px;top:-340px;border-color:var(--arcane);box-shadow:0 0 30px var(--arcane),inset 0 0 30px var(--arcane);animation:r2 30s linear infinite"></div>
+    <div class="ring" style="width:460px;height:460px;left:-230px;top:-230px;border-color:var(--ember);box-shadow:0 0 30px var(--ember),inset 0 0 30px var(--ember);animation:r1 22s linear infinite reverse"></div>
+  </div>
+</div></div>
+<div id="flash"></div>
+<div id="live" class="sr" aria-live="polite" aria-atomic="true"></div>
+<div id="toasts" aria-hidden="true"></div>
+<div id="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgt" aria-describedby="dlgp"><div class="panel">
+  <h2 id="dlgt"></h2><p id="dlgp" class="fb"></p>
+  <div class="row2" style="margin-top:1rem"><button id="dno"></button><button id="dyes" class="cta" style="margin:0"></button></div>
+</div></div>
+<button class="gear" id="gb" data-ia="set_h" aria-label="Settings">⚙️</button>
+<div id="set" role="dialog" aria-modal="true" aria-label="Settings"><div class="panel">
+  <h2 data-i="set_h">Settings</h2>
+  <p class="lab" data-i="set_lang">Language</p>
+  <div class="seg"><button data-l="ar">العربية</button><button data-l="en">English</button><button data-l="fr">Français</button></div>
+  <p class="lab" data-i="set_gfx">Graphics quality</p>
+  <div class="seg" id="gfx"><button data-g="low" data-i="low">Low</button><button data-g="med" data-i="med">Medium</button><button data-g="high" data-i="high">High</button></div>
+  <label class="chk"><input type="checkbox" id="snd"><span data-i="set_snd">Sound effects</span></label>
+  <label class="chk"><span data-i="set_vol">Volume</span><input type="range" id="vol" min="0" max="100"></label>
+  <label class="chk"><input type="checkbox" id="rm"><span data-i="set_rm">Reduce motion</span></label>
+  <button id="clr" class="ghost" style="width:100%" data-i="set_clr">Clear saved progress</button>
+  <p class="note" data-i="set_note"></p>
+  <button class="cta" id="sc" data-i="close">Close</button>
+</div></div>
+<main>
+  <div class="langbar" role="group" aria-label="Language"><button data-l="ar">العربية</button><button data-l="en">English</button><button data-l="fr">Français</button></div>
+  <h1>The Oracle ∞</h1>
+  <p class="sub" data-i="sub"></p>
+  <div id="tilt"><div id="app" tabindex="-1"><div class="load" role="status"><span class="spin"></span><span data-i="loading">Summoning the Oracle…</span></div></div></div>
+  <noscript><p class="note">JavaScript is required to play. / يتطلب اللعب تفعيل جافاسكربت.</p></noscript>
+</main>
+<script>
+/* ===== i18n core ===== */
+const I18N=(()=>{const D={};let lang="en";
+  const raw=k=>{const v=D[lang]&&D[lang][k];return v!==undefined?v:D.en&&D.en[k]};
+  return{add:(l,o)=>{D[l]=Object.assign(D[l]||{},o)},raw,has:l=>!!D[l],keys:l=>Object.keys(D[l]||{}),get lang(){return lang},
+    set(l){lang=D[l]?l:"en";document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr"},
+    t:(k,...a)=>{const s=raw(k);return typeof s!=="string"?String(k):s.replace(/\{(\d)\}/g,(_,i)=>a[i]===undefined?"":a[i])}}})();
+/* ===== dictionaries: English, Arabic, French ===== */
+I18N.add("en",{
+title:"The Oracle ∞ – Games of logic, memory and reflection",sub:"Games of logic, memory and reflection",loading:"Summoning the Oracle…",
+wel_h:"Welcome, seeker",wel_p:"Play eight games of logic, memory, speed and reflection. Everything runs in your browser and nothing is uploaded.",
+chip1:"🎮 8 games",chip2:"🌍 3 languages",chip3:"💡 hints",chip4:"💾 saved on this device",
+enter:"Enter the Oracle",how:"How to play",menu_h:"Choose a game",
+menu_note:"Puzzle results and the personality reflection are separate: one measures puzzle performance, the other is for self-reflection.",
+progress:"My progress",back:"Back",gotit:"Got it",exit:"✕ Exit",exit2:"Tap again to exit",again:"Play again",tomenu:"Back to the menu",start:"Start",moves:"Moves",easy:"Easy",hard:"Hard",newbest:"🏆 New personal best!",
+g_logic:"Shape Logic",g_logic_d:"80 puzzles, 4 levels, hints and streaks",
+g_mb:"Personality Reflection",g_mb_d:"24 statements and a radar report",
+g_mem:"Memory Match",g_mem_d:"Find all the hidden pairs",
+g_echo:"Pattern Echo",g_echo_d:"Repeat the growing light-and-sound pattern",
+g_slide:"Sliding Tiles",g_slide_d:"Slide the tiles back into order",
+g_math:"Math Sprint",g_math_d:"Solve as many sums as you can in 45 seconds",
+g_lights:"Lights Out",g_lights_d:"Switch off every light",
+g_react:"Reaction Test",g_react_d:"How fast can you react?",
+ht1:"Pick a game. Each card shows your best result on this device.",
+ht2:"Shape Logic: find the rule and choose the piece that completes the pattern. A hint halves the points.",
+ht3:"Memory, Echo, Tiles, Math, Lights and Reaction are quick games you can replay to beat your best.",
+ht4:"Personality Reflection is for self-reflection only. It is not a diagnosis, and your game scores say nothing about your personality.",
+ht5:"Change language, graphics, sound and motion in ⚙️ Settings.",
+ht_kb_h:"Keyboard",ht_kb:"Keys 1–6 choose an option, H shows a hint, 1–5 rate a statement, arrow keys move tiles, Enter continues, Esc closes settings, Tab moves between buttons.",
+pr_empty:"📭 Nothing here yet. Play a game and your best results will appear.",pr_note:"Saved only on this device. You can erase it in ⚙️ Settings.",
+pr_mb:"Last personality reflection: {0} ({1}). It is a snapshot for reflection, not a label.",pr_nomb:"No personality reflection saved yet.",pr_none:"not played yet",
+pr_runs:"Runs",pr_acc:"Accuracy",pr_streak:"Best streak",pr_games:"Quick games",
+u_moves:"{0} moves",u_ms:"{0} ms",u_rounds:"round {0}",u_ok:"{0} correct",u_pct:"{0}%",
+set_h:"Settings",set_lang:"Language",set_gfx:"Graphics quality",low:"Low",med:"Medium",high:"High",set_snd:"Sound effects",set_vol:"Volume",
+set_rm:"Reduce motion (no camera, warp, particles or 3D)",set_clr:"Clear saved progress",set_clr2:"Tap again to confirm",set_clrd:"Progress cleared ✓",
+set_note:"Language and settings are kept. Only scores, stats and your last result are erased.",close:"Close",
+err_h:"Something went wrong",err_menu:"Return to the menu",err_reload:"Reload the page",err_bank:"The puzzle bank could not be built.",err_nop:"No puzzles are available for this level.",
+lv0:"Beginner",lv1:"Advanced",lv2:"Expert",lv3:"Master",
+lvd0:"One rule at a time",lvd1:"Two rules combined",lvd2:"Three rules, slow and Fibonacci patterns",lvd3:"3×3 matrices and hidden structure",
+lg_h:"Choose a difficulty",lg_timed:"Time challenge: {0} seconds per puzzle, with bonus points for speed",lg_begin:"Begin the trial",
+lg_note:"{0} puzzles in total, 10 drawn per run. It is a puzzle game, not an intelligence test.",lg_best:" · best {0}%",
+lg_q:"Which piece completes the pattern?",lg_pat:"Pattern with one missing piece",lg_opt:"Option {0}",lg_hint:"💡 Show hint (halves the points)",
+lg_ok:"✅ Correct, +{0} points",lg_no:"❌ Incorrect",lg_to:"⏰ Time is up",lg_next:"Next puzzle",lg_see:"See results",
+lg_res:"{0} results",lg_acc:"Accuracy",lg_pts:"Points",lg_bs:"Best streak",lg_hints:"Hints",lg_avg:"Avg time",
+lg_m1:"Excellent work. You are ready for the next difficulty.",lg_m2:"Outstanding. You solved the hardest tier.",lg_m3:"A solid run. Read the explanations below and try again.",lg_m4:"This level is a real challenge. Review the explanations, or try an easier level first.",
+lg_rev:"Review missed puzzles ({0})",lg_pz:"Puzzle {0}: {1}",lg_calc_s:"How are points calculated?",
+lg_calc:"A correct answer earns 10 points (5 if you used the hint). From your 3rd correct answer in a row you earn a streak bonus of +2, rising by 2 per answer up to +10. In time-challenge mode you can earn up to +5 for speed. The total is multiplied by the level (Beginner ×1, Advanced ×1.5, Expert ×2, Master ×3). Wrong answers earn 0 and reset the streak. Accuracy is the fairest way to compare runs.",
+lg_disc:"This is a puzzle game. Its results are not an IQ score and cannot reliably measure intelligence.",
+rules:"Rules: {0}.",and:" and ",a_rot:"the turning marker",a_sides:"the number of sides",a_fill:"the colour",a_scale:"the size",a_dots:"the dots",
+h_focus:"Focus on {0}.",h_hard:"Compare neighbours one property at a time. Not every property changes at the same pace.",
+r_cw:"the marker turns {0}° clockwise each step",r_ccw:"the marker turns {0}° anticlockwise each step",r_up:"it gains one side each step",r_down:"it loses one side each step",r_slow:"it gains a side every second step",r_fill:"the colour repeats in a cycle of {0}",r_grow:"it grows by a constant amount",r_shrink:"it shrinks by a constant amount",r_dot:"it gains one dot each step",r_fib:"the dots follow 1, 1, 2, 3, 5 (Fibonacci)",
+n_add:"Add {0} each time.",n_sub:"Subtract {0} each time.",n_mul:"Multiply by {0} each time.",n_sq:"These are square numbers.",n_grow:"The step grows by {0} each time ({1}, {2}, {3}…).",n_dbl:"Double the number, then add {0}.",n_fib:"Each number is the sum of the two before it.",n_alt:"Add {0}, subtract {1}, and repeat.",n_tri:"Triangular numbers: the gap grows by 1 each time.",n_sqp:"Square numbers plus 1.",n_sqm:"Square numbers minus 1.",n_cube:"Cube numbers.",n_prime:"Consecutive prime numbers.",n_fact:"Multiply by 2, 3, 4, 5, 6: the multiplier grows by one.",n_inter:"Two sequences interleave: positions 1, 3, 5 add {0}; positions 2, 4, 6 subtract {1}.",n_gap:"The gap doubles each time.",n_fib1:"Each number is the sum of the two before it, plus 1.",n_dbl1:"Alternately double and add 1.",
+hn_diff:"Look at the differences between neighbouring numbers.",hn_mul:"Does each number come from adding or multiplying?",hn_pow:"Think of a number multiplied by itself.",hn_ops:"Two operations are combined.",hn_add:"Try adding neighbours.",hn_alt:"The operation alternates.",hn_prime:"Each number has only two divisors.",hn_ratio:"Look at the ratios, not the differences.",hn_every2:"Try reading every second number.",hn_second:"Look at the differences of the differences.",
+m_latin:"Every row and every column contains each shape once and each colour once.",hm_latin:"Check which shape and colour are missing from the last row and column.",m_dots:"In every row, the third shape has as many dots as the first two combined.",hm_dots:"Count the dots in each row.",m_rot:"Each step right turns the marker {0}°, and each step down turns it {1}°.",hm_rot:"Follow the white marker along a row, then down a column.",
+mb_intro:"You will rate 24 statements from “Strongly disagree” to “Strongly agree”. There are no right answers, and each trait has statements for both sides, so you are never forced into a single either/or choice.",
+mb_warn:"🧭 This reflection is for self-exploration, not a clinical or diagnostic assessment. Types are tendencies on a spectrum, not boxes, and they can change with context and time.",
+mb_begin:"Begin",mb_stmt:"Statement {0} of {1}",prev:"← Previous",
+rp_h:"Your reflection",rp_dims:"Your four dimensions",rp_ov:"Overview",rp_radar:"Radar chart of your eight trait percentages",
+rp_conf:"Confidence: {0} of 4 dimensions are clear (moderate or strong). {1}",rp_c4:"Your profile is quite distinct.",rp_c2:"Some dimensions sit near the middle, so treat the letters as tendencies.",rp_c0:"Most dimensions sit near the middle, so you likely adapt your style to the situation.",
+rp_mid:" Because this dimension is close to the middle ({0}% / {1}%), you probably also use the opposite style ({2}) when it suits you.",
+rp_str:"Strengths",rp_bl:"Possible blind spots",rp_gr:"Growth ideas",rp_infl:"Which answers shaped this?",rp_push:"“{0}” ({1}) pushed you toward {2}.",rp_pull:"“{0}” ({1}) pulled the other way.",rp_none:"No answers pointed clearly toward this side.",
+rp_how:"How is this calculated?",rp_howt:"Each dimension has 6 statements, 3 for each side. “Agree” answers move you toward the side a statement describes, and “disagree” answers move you away from it. Scores run from −12 to +12. A difference of 0–2 is borderline, 3–5 slight, 6–8 moderate and 9–12 strong.",
+rp_warn:"🧭 This result is for self-reflection only. It is not a clinical or diagnostic assessment, and it cannot predict ability, career success or mental health.",
+c0:"Borderline",c1:"Slight",c2:"Moderate",c3:"Strong",
+LK:["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"],
+Q:["I feel energized after time in a lively group.","I need quiet time alone to recover after a busy day.","I often think best while talking things through.","I prefer deep one-on-one talks to large gatherings.","I start conversations with strangers easily.","I usually think carefully before I speak.","I trust concrete facts and past experience more than hunches.","I am drawn to patterns, theories and what could be possible.","I notice small practical details that others miss.","My mind often jumps to future ideas and connections.","I like clear, step-by-step instructions.","I enjoy experimenting without a set method.","In a disagreement I focus on what is logically correct.","I first consider how a decision will affect people’s feelings.","I can set feelings aside to make a tough call.","I sense what others feel without being told.","I value fairness and consistency over case-by-case exceptions.","I would bend a rule to protect someone I care about.","I feel better when my day has a clear plan.","I like keeping my options open as long as possible.","I finish tasks well before the deadline.","I do my best work in last-minute bursts of energy.","I like decisions to be settled and closed.","I enjoy adapting when plans change."],
+L:{E:["Extraversion","You tend to gain energy from people and activity, and you often think by talking.","You build connections quickly and bring momentum to groups.","You may speak before reflecting, or find long stretches alone draining.","Add short pauses to think before big decisions."],
+I:["Introversion","You tend to recharge alone or in small circles and think before you speak.","You listen deeply and bring focus and depth to your work.","Your ideas may stay unspoken, and others may misread quiet as disinterest.","Share half-formed thoughts early so people can build on them."],
+S:["Sensing","You tend to trust concrete facts, experience and what is observable now.","You are practical, observant and good at making ideas real.","You may dismiss unproven ideas or miss the bigger pattern.","Set aside time to ask “what else could this mean?”"],
+N:["Intuition","You tend to look for patterns, meaning and future possibilities.","You generate ideas and connect things that seem unrelated.","You may overlook practical details or lose interest in routine follow-through.","Turn each big idea into one concrete next step."],
+T:["Thinking","You tend to decide through logic, consistency and objective criteria.","You analyze clearly and stay steady under pressure.","Your directness can feel cold, and you may undervalue emotional data.","Name the human impact of a decision out loud before you finalize it."],
+F:["Feeling","You tend to decide through values, empathy and the impact on people.","You build trust and notice what others need.","You may avoid necessary conflict or take criticism personally.","Practice giving honest feedback kindly rather than delaying it."],
+J:["Judging","You tend to prefer structure, plans and closure.","You are reliable, organized and good at finishing what you start.","You may resist change or decide too early.","Build a little slack into plans so surprises feel less stressful."],
+P:["Perceiving","You tend to prefer flexibility, spontaneity and keeping options open.","You adapt quickly and handle the unexpected well.","You may postpone decisions or leave tasks unfinished.","Use small deadlines to turn options into commitments."]},
+D:{INTJ:"Strategic, independent, analytical and future-focused.",INTP:"Curious, analytical, creative and interested in ideas.",ENTJ:"Confident, organized, strategic and goal-oriented.",ENTP:"Creative, curious, energetic and enjoys challenging ideas.",INFJ:"Insightful, thoughtful, idealistic and empathetic.",INFP:"Imaginative, sensitive, idealistic and values-driven.",ENFJ:"Social, supportive, organized and motivating.",ENFP:"Energetic, creative, curious and enthusiastic.",ISTJ:"Responsible, organized, practical and reliable.",ISFJ:"Supportive, careful, loyal and responsible.",ESTJ:"Organized, practical, direct and responsible.",ESFJ:"Friendly, cooperative, responsible and social.",ISTP:"Practical, independent, calm and problem-solving.",ISFP:"Quiet, flexible, creative and sensitive.",ESTP:"Energetic, practical, spontaneous and action-oriented.",ESFP:"Social, energetic, spontaneous and enthusiastic."},
+card:"Card {0}",mem_done:"All pairs found in {0} moves!",echo_round:"Round {0}",echo_watch:"Watch the pattern…",echo_you:"Your turn!",echo_over:"Game over. You completed {0} rounds.",
+shuffle:"Shuffle",slide_win:"Solved in {0} moves!",math_intro:"Solve as many as you can in {0} seconds. A wrong answer costs 3 seconds.",math_ok:"Correct: {0}",math_done:"Time’s up! {0} correct.",
+lights_goal:"Turn off every light. Each tap flips the tapped light and its neighbours.",lights_win:"All dark! Solved in {0} moves.",lights_new:"New puzzle",
+react_intro:"Tap the box as soon as it turns green. Five rounds.",react_tap:"Tap to start",react_wait:"Wait for green…",react_go:"Tap now!",react_early:"Too early! Tap to try again.",react_ms:"{0} ms. Tap for the next round.",react_round:"Round {0} of 5",react_done:"Average of 5: {0} ms"
+});
+
+I18N.add("ar",{
+title:"العرّاف ∞ – ألعاب المنطق والذاكرة والتأمل",sub:"ألعاب المنطق والذاكرة والتأمل",loading:"جارٍ استدعاء العرّاف…",
+wel_h:"أهلاً بك أيها الباحث",wel_p:"العب ثماني ألعاب في المنطق والذاكرة والسرعة والتأمل. كل شيء يعمل داخل متصفحك ولا يُرفع أي شيء.",
+chip1:"🎮 8 ألعاب",chip2:"🌍 3 لغات",chip3:"💡 تلميحات",chip4:"💾 محفوظ على جهازك",
+enter:"ادخل إلى العرّاف",how:"طريقة اللعب",menu_h:"اختر لعبة",
+menu_note:"نتائج الألغاز منفصلة عن تأمل الشخصية: الأولى تقيس أداءك في الألغاز، والثانية للتأمل الذاتي فقط.",
+progress:"تقدّمي",back:"رجوع",gotit:"فهمت",exit:"✕ خروج",exit2:"اضغط مرة أخرى للخروج",again:"العب مجدداً",tomenu:"العودة إلى القائمة",start:"ابدأ",moves:"الحركات",easy:"سهل",hard:"صعب",newbest:"🏆 رقم قياسي شخصي جديد!",
+g_logic:"منطق الأشكال",g_logic_d:"80 لغزاً و4 مستويات وتلميحات",
+g_mb:"تأمل الشخصية",g_mb_d:"24 عبارة وتقرير برسم رادار",
+g_mem:"تطابق الذاكرة",g_mem_d:"اعثر على كل الأزواج المخفية",
+g_echo:"صدى النمط",g_echo_d:"كرّر نمط الأضواء والأصوات المتزايد",
+g_slide:"البلاطات المنزلقة",g_slide_d:"أعد ترتيب البلاطات",
+g_math:"سباق الحساب",g_math_d:"حلّ أكبر عدد من العمليات في 45 ثانية",
+g_lights:"إطفاء الأضواء",g_lights_d:"أطفئ كل الأضواء",
+g_react:"اختبار ردّ الفعل",g_react_d:"ما مدى سرعة ردّ فعلك؟",
+ht1:"اختر لعبة. تعرض كل بطاقة أفضل نتيجة لك على هذا الجهاز.",
+ht2:"منطق الأشكال: اكتشف القاعدة واختر القطعة التي تُكمل النمط. التلميح يخفض النقاط إلى النصف.",
+ht3:"الذاكرة والصدى والبلاطات والحساب والأضواء وردّ الفعل ألعاب سريعة يمكنك إعادتها لتحطيم رقمك.",
+ht4:"تأمل الشخصية للتأمل الذاتي فقط. ليس تشخيصاً، ونتائجك في الألعاب لا تقول شيئاً عن شخصيتك.",
+ht5:"غيّر اللغة والرسومات والصوت والحركة من ⚙️ الإعدادات.",
+ht_kb_h:"لوحة المفاتيح",ht_kb:"المفاتيح 1–6 لاختيار إجابة، وH للتلميح، و1–5 لتقييم العبارة، وأسهم الاتجاه لتحريك البلاطات، وEnter للمتابعة، وEsc لإغلاق الإعدادات، وTab للتنقل بين الأزرار.",
+pr_empty:"📭 لا شيء هنا بعد. العب لعبة وستظهر أفضل نتائجك.",pr_note:"محفوظ على هذا الجهاز فقط. يمكنك مسحه من ⚙️ الإعدادات.",
+pr_mb:"آخر تأمل للشخصية: {0} ({1}). هو لقطة للتأمل وليس تصنيفاً.",pr_nomb:"لم يُحفظ أي تأمل للشخصية بعد.",pr_none:"لم تُلعب بعد",
+pr_runs:"المحاولات",pr_acc:"الدقة",pr_streak:"أفضل سلسلة",pr_games:"الألعاب السريعة",
+u_moves:"{0} حركة",u_ms:"{0} م.ث",u_rounds:"الجولة {0}",u_ok:"{0} صحيحة",u_pct:"{0}%",
+set_h:"الإعدادات",set_lang:"اللغة",set_gfx:"جودة الرسومات",low:"منخفضة",med:"متوسطة",high:"عالية",set_snd:"المؤثرات الصوتية",set_vol:"مستوى الصوت",
+set_rm:"تقليل الحركة (بلا كاميرا أو اندفاع نجوم أو جسيمات أو ثلاثي الأبعاد)",set_clr:"مسح التقدم المحفوظ",set_clr2:"اضغط مرة أخرى للتأكيد",set_clrd:"تم مسح التقدم ✓",
+set_note:"تبقى اللغة والإعدادات محفوظة. تُمسح النتائج والإحصاءات وآخر نتيجة فقط.",close:"إغلاق",
+err_h:"حدث خطأ ما",err_menu:"العودة إلى القائمة",err_reload:"إعادة تحميل الصفحة",err_bank:"تعذّر إنشاء مخزن الألغاز.",err_nop:"لا توجد ألغاز متاحة لهذا المستوى.",
+lv0:"مبتدئ",lv1:"متقدم",lv2:"خبير",lv3:"أستاذ",
+lvd0:"قاعدة واحدة في كل مرة",lvd1:"قاعدتان معاً",lvd2:"ثلاث قواعد وأنماط بطيئة وفيبوناتشي",lvd3:"مصفوفات 3×3 وبنية خفية",
+lg_h:"اختر مستوى الصعوبة",lg_timed:"تحدي الوقت: {0} ثانية لكل لغز مع نقاط إضافية للسرعة",lg_begin:"ابدأ التجربة",
+lg_note:"{0} لغزاً في المجموع، يُسحب منها 10 في كل جولة. هذه لعبة ألغاز وليست اختباراً للذكاء.",lg_best:" · الأفضل {0}%",
+lg_q:"أي قطعة تُكمل النمط؟",lg_pat:"نمط تنقصه قطعة واحدة",lg_opt:"الخيار {0}",lg_hint:"💡 أظهر تلميحاً (يخفض النقاط إلى النصف)",
+lg_ok:"✅ صحيح، +{0} نقطة",lg_no:"❌ خطأ",lg_to:"⏰ انتهى الوقت",lg_next:"اللغز التالي",lg_see:"عرض النتائج",
+lg_res:"نتائج مستوى {0}",lg_acc:"الدقة",lg_pts:"النقاط",lg_bs:"أفضل سلسلة",lg_hints:"التلميحات",lg_avg:"متوسط الوقت",
+lg_m1:"عمل ممتاز. أنت جاهز للمستوى التالي.",lg_m2:"رائع. لقد حللت أصعب مستوى.",lg_m3:"جولة جيدة. اقرأ التفسيرات أدناه وحاول مجدداً.",lg_m4:"هذا المستوى تحدٍّ حقيقي. راجع التفسيرات أو جرّب مستوى أسهل أولاً.",
+lg_rev:"مراجعة الألغاز الخاطئة ({0})",lg_pz:"اللغز {0}: {1}",lg_calc_s:"كيف تُحتسب النقاط؟",
+lg_calc:"الإجابة الصحيحة تمنح 10 نقاط (5 إن استخدمت التلميح). ابتداءً من الإجابة الصحيحة الثالثة على التوالي تحصل على مكافأة سلسلة قدرها +2 تزداد 2 مع كل إجابة حتى +10. في وضع تحدي الوقت يمكنك كسب حتى +5 للسرعة. يُضرب المجموع في معامل المستوى (مبتدئ ×1، متقدم ×1.5، خبير ×2، أستاذ ×3). الإجابة الخاطئة تمنح 0 وتكسر السلسلة. الدقة هي أعدل وسيلة لمقارنة الجولات.",
+lg_disc:"هذه لعبة ألغاز. نتائجها ليست درجة ذكاء ولا يمكنها قياس الذكاء بشكل موثوق.",
+rules:"القواعد: {0}.",and:" و",a_rot:"العلامة الدوّارة",a_sides:"عدد الأضلاع",a_fill:"اللون",a_scale:"الحجم",a_dots:"النقاط",
+h_focus:"ركّز على {0}.",h_hard:"قارن بين الأشكال المتجاورة خاصيةً بعد أخرى. ليست كل الخصائص تتغير بالوتيرة نفسها.",
+r_cw:"تدور العلامة {0}° مع عقارب الساعة في كل خطوة",r_ccw:"تدور العلامة {0}° عكس عقارب الساعة في كل خطوة",r_up:"يزداد ضلع واحد في كل خطوة",r_down:"ينقص ضلع واحد في كل خطوة",r_slow:"يزداد ضلع كل خطوتين",r_fill:"يتكرر اللون في دورة من {0}",r_grow:"يكبر بمقدار ثابت",r_shrink:"يصغر بمقدار ثابت",r_dot:"تزداد نقطة واحدة في كل خطوة",r_fib:"تتبع النقاط 1، 1، 2، 3، 5 (فيبوناتشي)",
+n_add:"أضف {0} في كل مرة.",n_sub:"اطرح {0} في كل مرة.",n_mul:"اضرب في {0} في كل مرة.",n_sq:"هذه أعداد مربعة.",n_grow:"تزداد الخطوة بمقدار {0} في كل مرة ({1}، {2}، {3}…).",n_dbl:"ضاعف العدد ثم أضف {0}.",n_fib:"كل عدد هو مجموع العددين السابقين له.",n_alt:"أضف {0} ثم اطرح {1} وكرّر.",n_tri:"أعداد مثلثية: تزداد الفجوة بمقدار 1 في كل مرة.",n_sqp:"أعداد مربعة زائد 1.",n_sqm:"أعداد مربعة ناقص 1.",n_cube:"أعداد مكعبة.",n_prime:"أعداد أولية متتالية.",n_fact:"اضرب في 2 ثم 3 ثم 4 ثم 5 ثم 6: يزداد المضروب بمقدار واحد.",n_inter:"متتاليتان متداخلتان: المواضع 1 و3 و5 تضيف {0}، والمواضع 2 و4 و6 تطرح {1}.",n_gap:"تتضاعف الفجوة في كل مرة.",n_fib1:"كل عدد هو مجموع العددين السابقين له زائد 1.",n_dbl1:"ضاعف ثم أضف 1 بالتناوب.",
+hn_diff:"انظر إلى الفروق بين الأعداد المتجاورة.",hn_mul:"هل ينتج كل عدد من الجمع أم من الضرب؟",hn_pow:"فكّر في عدد مضروب في نفسه.",hn_ops:"هناك عمليتان مدمجتان.",hn_add:"جرّب جمع الأعداد المتجاورة.",hn_alt:"العملية تتناوب.",hn_prime:"لكل عدد قاسمان فقط.",hn_ratio:"انظر إلى النِّسَب لا إلى الفروق.",hn_every2:"جرّب قراءة كل عدد ثانٍ.",hn_second:"انظر إلى فروق الفروق.",
+m_latin:"يحتوي كل صف وكل عمود على كل شكل مرة واحدة وكل لون مرة واحدة.",hm_latin:"تحقق من الشكل واللون الناقصين في الصف الأخير والعمود الأخير.",m_dots:"في كل صف، يحمل الشكل الثالث من النقاط ما يساوي مجموع الشكلين الأولين.",hm_dots:"عُدّ النقاط في كل صف.",m_rot:"كل خطوة إلى اليمين تدير العلامة {0}°، وكل خطوة إلى الأسفل تديرها {1}°.",hm_rot:"تتبّع العلامة البيضاء على طول صف ثم أسفل عمود.",
+mb_intro:"ستقيّم 24 عبارة من «لا أوافق بشدة» إلى «أوافق بشدة». لا توجد إجابات صحيحة، ولكل سمة عبارات للطرفين، فلا تُجبَر أبداً على خيار واحد من نوع إما/أو.",
+mb_warn:"🧭 هذا التأمل للاستكشاف الذاتي وليس تقييماً سريرياً أو تشخيصياً. الأنماط ميول على طيف وليست قوالب، وقد تتغير بتغير السياق والزمن.",
+mb_begin:"ابدأ",mb_stmt:"العبارة {0} من {1}",prev:"السابق →",
+rp_h:"تأمّلك",rp_dims:"أبعادك الأربعة",rp_ov:"نظرة عامة",rp_radar:"مخطط رادار لنسب سماتك الثماني",
+rp_conf:"درجة الثقة: {0} من 4 أبعاد واضحة (متوسطة أو قوية). {1}",rp_c4:"ملفك متمايز بوضوح.",rp_c2:"بعض الأبعاد قريبة من المنتصف، فاعتبر الحروف ميولاً لا أحكاماً.",rp_c0:"معظم الأبعاد قريبة من المنتصف، فغالباً ما تكيّف أسلوبك حسب الموقف.",
+rp_mid:" ولأن هذا البعد قريب من المنتصف ({0}% / {1}%)، فمن المرجح أنك تستخدم الأسلوب المقابل ({2}) أيضاً عندما يناسبك.",
+rp_str:"نقاط القوة",rp_bl:"نقاط عمياء محتملة",rp_gr:"أفكار للنمو",rp_infl:"ما الإجابات التي شكّلت هذه النتيجة؟",rp_push:"«{0}» ({1}) دفعتك نحو {2}.",rp_pull:"«{0}» ({1}) سحبتك في الاتجاه المعاكس.",rp_none:"لم تشر أي إجابة بوضوح إلى هذا الجانب.",
+rp_how:"كيف تُحتسب النتيجة؟",rp_howt:"لكل بعد 6 عبارات، 3 لكل جانب. إجابات «أوافق» تحرّكك نحو الجانب الذي تصفه العبارة، وإجابات «لا أوافق» تبعدك عنه. تتراوح الدرجات من −12 إلى +12. فرق من 0 إلى 2 حدّي، ومن 3 إلى 5 خفيف، ومن 6 إلى 8 متوسط، ومن 9 إلى 12 قوي.",
+rp_warn:"🧭 هذه النتيجة للتأمل الذاتي فقط. ليست تقييماً سريرياً أو تشخيصياً، ولا يمكنها التنبؤ بالقدرات أو النجاح المهني أو الصحة النفسية.",
+c0:"حدّي",c1:"خفيف",c2:"متوسط",c3:"قوي",
+LK:["لا أوافق بشدة","لا أوافق","محايد","أوافق","أوافق بشدة"],
+Q:["أشعر بالنشاط بعد قضاء وقت في مجموعة مفعمة بالحيوية.","أحتاج إلى وقت هادئ بمفردي لأستعيد طاقتي بعد يوم حافل.","غالباً ما أفكر بأفضل صورة حين أتحدث عن الأمور بصوت عالٍ.","أفضّل الأحاديث العميقة بين شخصين على التجمعات الكبيرة.","أبدأ الحديث مع الغرباء بسهولة.","عادةً أفكر بعناية قبل أن أتكلم.","أثق بالحقائق الملموسة والخبرة السابقة أكثر من الحدس.","تجذبني الأنماط والنظريات وما يمكن أن يحدث.","ألاحظ تفاصيل عملية صغيرة يغفل عنها الآخرون.","يقفز ذهني كثيراً إلى أفكار وروابط مستقبلية.","أحب التعليمات الواضحة خطوة بخطوة.","أستمتع بالتجريب دون طريقة محددة مسبقاً.","في الخلافات أركّز على ما هو صحيح منطقياً.","أفكر أولاً في أثر القرار على مشاعر الناس.","أستطيع وضع مشاعري جانباً لاتخاذ قرار صعب.","أستشعر ما يشعر به الآخرون دون أن يخبروني.","أُقدّر العدالة والاتساق أكثر من الاستثناءات الفردية.","قد أتجاوز قاعدة لأحمي شخصاً أهتم به.","أشعر بتحسن حين يكون ليومي خطة واضحة.","أحب إبقاء خياراتي مفتوحة أطول وقت ممكن.","أنهي مهامي قبل الموعد النهائي بوقت طويل.","أقدّم أفضل ما عندي في اندفاعات اللحظة الأخيرة.","أحب أن تكون القرارات محسومة ومغلقة.","أستمتع بالتكيّف حين تتغير الخطط."],
+L:{E:["الانبساط","تميل إلى استمداد طاقتك من الناس والنشاط، وغالباً ما تفكر وأنت تتحدث.","تكوّن العلاقات بسرعة وتمنح المجموعات زخماً.","قد تتكلم قبل أن تتأمل، أو تجد الفترات الطويلة وحدك مُرهِقة.","أضف وقفات قصيرة للتفكير قبل القرارات الكبيرة."],
+I:["الانطواء","تميل إلى استعادة طاقتك وحدك أو مع دائرة صغيرة، وتفكر قبل أن تتكلم.","تُصغي بعمق وتضفي تركيزاً وعمقاً على عملك.","قد تبقى أفكارك غير معلنة، وقد يفهم الآخرون هدوءك على أنه عدم اهتمام.","شارك أفكارك غير المكتملة مبكراً ليبني عليها الآخرون."],
+S:["الحسّ","تميل إلى الوثوق بالحقائق الملموسة والخبرة وما يمكن ملاحظته الآن.","أنت عملي وملاحِظ وماهر في تحويل الأفكار إلى واقع.","قد تستبعد الأفكار غير المجرَّبة أو تفوتك الصورة الأكبر.","خصّص وقتاً لتسأل: «ماذا يمكن أن يعني هذا أيضاً؟»"],
+N:["الحدس","تميل إلى البحث عن الأنماط والمعاني والاحتمالات المستقبلية.","تولّد الأفكار وتربط بين أشياء تبدو غير مترابطة.","قد تغفل التفاصيل العملية أو يفتر اهتمامك بالمتابعة الروتينية.","حوّل كل فكرة كبيرة إلى خطوة تالية ملموسة واحدة."],
+T:["التفكير","تميل إلى اتخاذ القرار بالمنطق والاتساق والمعايير الموضوعية.","تحلل بوضوح وتبقى ثابتاً تحت الضغط.","قد تبدو مباشرتك باردة، وقد تقلل من قيمة المعطيات العاطفية.","سمِّ الأثر الإنساني للقرار بصوت عالٍ قبل أن تحسمه."],
+F:["الشعور","تميل إلى اتخاذ القرار بالقيم والتعاطف وأثره على الناس.","تبني الثقة وتلاحظ ما يحتاجه الآخرون.","قد تتجنب صراعاً ضرورياً أو تأخذ النقد على محمل شخصي.","تدرّب على تقديم ملاحظات صادقة بلطف بدل تأجيلها."],
+J:["الحسم","تميل إلى تفضيل التنظيم والخطط والإغلاق.","أنت موثوق ومنظّم وتُتقن إنهاء ما تبدأ.","قد تقاوم التغيير أو تحسم مبكراً أكثر من اللازم.","اترك هامشاً بسيطاً في خططك لتخفّ وطأة المفاجآت."],
+P:["المرونة","تميل إلى تفضيل المرونة والعفوية وإبقاء الخيارات مفتوحة.","تتكيّف بسرعة وتتعامل جيداً مع غير المتوقع.","قد تؤجل القرارات أو تترك المهام دون إنجاز.","استخدم مواعيد نهائية صغيرة لتحويل الخيارات إلى التزامات."]},
+D:{INTJ:"استراتيجي مستقل تحليلي ويركّز على المستقبل.",INTP:"فضولي تحليلي مبدع ويهتم بالأفكار.",ENTJ:"واثق منظّم استراتيجي وموجَّه نحو الأهداف.",ENTP:"مبدع فضولي نشيط ويحب تحدّي الأفكار.",INFJ:"ثاقب البصيرة متأمل مثالي ومتعاطف.",INFP:"خيالي حساس مثالي تحرّكه القيم.",ENFJ:"اجتماعي داعم منظّم وملهِم.",ENFP:"نشيط مبدع فضولي ومتحمّس.",ISTJ:"مسؤول منظّم عملي ويُعتمد عليه.",ISFJ:"داعم دقيق وفيّ ومسؤول.",ESTJ:"منظّم عملي مباشر ومسؤول.",ESFJ:"ودود متعاون مسؤول واجتماعي.",ISTP:"عملي مستقل هادئ وبارع في حل المشكلات.",ISFP:"هادئ مرن مبدع وحساس.",ESTP:"نشيط عملي عفوي ويميل إلى الفعل.",ESFP:"اجتماعي نشيط عفوي ومتحمّس."},
+card:"البطاقة {0}",mem_done:"وجدت كل الأزواج في {0} حركة!",echo_round:"الجولة {0}",echo_watch:"راقب النمط…",echo_you:"دورك!",echo_over:"انتهت اللعبة. أكملت {0} جولات.",
+shuffle:"إعادة الخلط",slide_win:"تم الحل في {0} حركة!",math_intro:"حلّ أكبر عدد ممكن خلال {0} ثانية. الإجابة الخاطئة تكلّفك 3 ثوانٍ.",math_ok:"الصحيحة: {0}",math_done:"انتهى الوقت! {0} إجابة صحيحة.",
+lights_goal:"أطفئ كل الأضواء. تبدّل كل نقرة الضوء المضغوط وجيرانه.",lights_win:"أظلم كل شيء! تم الحل في {0} حركة.",lights_new:"لغز جديد",
+react_intro:"اضغط على المربع فور أن يتحول إلى الأخضر. خمس جولات.",react_tap:"اضغط للبدء",react_wait:"انتظر اللون الأخضر…",react_go:"اضغط الآن!",react_early:"مبكر جداً! اضغط للمحاولة مجدداً.",react_ms:"{0} م.ث. اضغط للجولة التالية.",react_round:"الجولة {0} من 5",react_done:"متوسط 5 جولات: {0} م.ث"
+});
+
+I18N.add("fr",{
+title:"The Oracle ∞ – Jeux de logique, de mémoire et de réflexion",sub:"Jeux de logique, de mémoire et de réflexion",loading:"Invocation de l’Oracle…",
+wel_h:"Bienvenue, chercheur",wel_p:"Jouez à huit jeux de logique, de mémoire, de vitesse et de réflexion. Tout fonctionne dans votre navigateur et rien n’est envoyé.",
+chip1:"🎮 8 jeux",chip2:"🌍 3 langues",chip3:"💡 indices",chip4:"💾 enregistré sur cet appareil",
+enter:"Entrer dans l’Oracle",how:"Comment jouer",menu_h:"Choisissez un jeu",
+menu_note:"Les résultats des énigmes et la réflexion sur la personnalité sont distincts : l’un mesure la performance aux énigmes, l’autre sert à la réflexion personnelle.",
+progress:"Ma progression",back:"Retour",gotit:"Compris",exit:"✕ Quitter",exit2:"Touchez encore pour quitter",again:"Rejouer",tomenu:"Retour au menu",start:"Commencer",moves:"Coups",easy:"Facile",hard:"Difficile",newbest:"🏆 Nouveau record personnel !",
+g_logic:"Logique des formes",g_logic_d:"80 énigmes, 4 niveaux, indices et séries",
+g_mb:"Réflexion sur la personnalité",g_mb_d:"24 affirmations et un rapport en radar",
+g_mem:"Paires mémoire",g_mem_d:"Retrouvez toutes les paires cachées",
+g_echo:"Écho de motifs",g_echo_d:"Répétez la séquence de lumières et de sons",
+g_slide:"Taquin",g_slide_d:"Remettez les tuiles dans l’ordre",
+g_math:"Sprint de calcul",g_math_d:"Résolvez un maximum de calculs en 45 secondes",
+g_lights:"Lights Out",g_lights_d:"Éteignez toutes les lumières",
+g_react:"Test de réaction",g_react_d:"À quelle vitesse réagissez-vous ?",
+ht1:"Choisissez un jeu. Chaque carte affiche votre meilleur résultat sur cet appareil.",
+ht2:"Logique des formes : trouvez la règle et choisissez la pièce qui complète le motif. Un indice divise les points par deux.",
+ht3:"Mémoire, Écho, Taquin, Calcul, Lumières et Réaction sont des jeux rapides à rejouer pour battre votre record.",
+ht4:"La réflexion sur la personnalité sert uniquement à la réflexion personnelle. Ce n’est pas un diagnostic, et vos scores de jeu ne disent rien de votre personnalité.",
+ht5:"Changez la langue, les graphismes, le son et les animations dans ⚙️ Réglages.",
+ht_kb_h:"Clavier",ht_kb:"Touches 1–6 pour choisir une option, H pour l’indice, 1–5 pour noter une affirmation, flèches pour déplacer les tuiles, Entrée pour continuer, Échap pour fermer les réglages, Tab pour passer d’un bouton à l’autre.",
+pr_empty:"📭 Rien ici pour l’instant. Jouez à un jeu et vos meilleurs résultats apparaîtront.",pr_note:"Enregistré uniquement sur cet appareil. Vous pouvez l’effacer dans ⚙️ Réglages.",
+pr_mb:"Dernière réflexion sur la personnalité : {0} ({1}). C’est un instantané pour réfléchir, pas une étiquette.",pr_nomb:"Aucune réflexion sur la personnalité enregistrée.",pr_none:"pas encore joué",
+pr_runs:"Parties",pr_acc:"Précision",pr_streak:"Meilleure série",pr_games:"Jeux rapides",
+u_moves:"{0} coups",u_ms:"{0} ms",u_rounds:"manche {0}",u_ok:"{0} correctes",u_pct:"{0} %",
+set_h:"Réglages",set_lang:"Langue",set_gfx:"Qualité graphique",low:"Basse",med:"Moyenne",high:"Haute",set_snd:"Effets sonores",set_vol:"Volume",
+set_rm:"Réduire les animations (sans caméra, vitesse-lumière, particules ni 3D)",set_clr:"Effacer la progression",set_clr2:"Touchez encore pour confirmer",set_clrd:"Progression effacée ✓",
+set_note:"La langue et les réglages sont conservés. Seuls les scores, les statistiques et le dernier résultat sont effacés.",close:"Fermer",
+err_h:"Une erreur est survenue",err_menu:"Retour au menu",err_reload:"Recharger la page",err_bank:"La banque d’énigmes n’a pas pu être créée.",err_nop:"Aucune énigme n’est disponible pour ce niveau.",
+lv0:"Débutant",lv1:"Avancé",lv2:"Expert",lv3:"Maître",
+lvd0:"Une règle à la fois",lvd1:"Deux règles combinées",lvd2:"Trois règles, rythmes lents et Fibonacci",lvd3:"Matrices 3×3 et structure cachée",
+lg_h:"Choisissez une difficulté",lg_timed:"Défi chronométré : {0} secondes par énigme, avec des points bonus pour la vitesse",lg_begin:"Commencer l’épreuve",
+lg_note:"{0} énigmes au total, 10 tirées à chaque partie. C’est un jeu d’énigmes, pas un test d’intelligence.",lg_best:" · record {0} %",
+lg_q:"Quelle pièce complète le motif ?",lg_pat:"Motif avec une pièce manquante",lg_opt:"Option {0}",lg_hint:"💡 Afficher l’indice (points divisés par deux)",
+lg_ok:"✅ Correct, +{0} points",lg_no:"❌ Incorrect",lg_to:"⏰ Temps écoulé",lg_next:"Énigme suivante",lg_see:"Voir les résultats",
+lg_res:"Résultats : {0}",lg_acc:"Précision",lg_pts:"Points",lg_bs:"Meilleure série",lg_hints:"Indices",lg_avg:"Temps moyen",
+lg_m1:"Excellent travail. Vous êtes prêt(e) pour la difficulté suivante.",lg_m2:"Remarquable. Vous avez résolu le niveau le plus difficile.",lg_m3:"Une bonne partie. Lisez les explications ci-dessous et réessayez.",lg_m4:"Ce niveau est un vrai défi. Relisez les explications ou essayez d’abord un niveau plus facile.",
+lg_rev:"Revoir les énigmes manquées ({0})",lg_pz:"Énigme {0} : {1}",lg_calc_s:"Comment les points sont-ils calculés ?",
+lg_calc:"Une bonne réponse rapporte 10 points (5 avec l’indice). À partir de la 3e bonne réponse d’affilée, vous gagnez un bonus de série de +2, qui augmente de 2 à chaque réponse jusqu’à +10. En mode chronométré, vous pouvez gagner jusqu’à +5 pour la vitesse. Le total est multiplié selon le niveau (Débutant ×1, Avancé ×1,5, Expert ×2, Maître ×3). Une mauvaise réponse rapporte 0 et casse la série. La précision est le moyen le plus juste de comparer les parties.",
+lg_disc:"Ceci est un jeu d’énigmes. Ses résultats ne sont pas un score de QI et ne mesurent pas l’intelligence de façon fiable.",
+rules:"Règles : {0}.",and:" et ",a_rot:"le repère qui tourne",a_sides:"le nombre de côtés",a_fill:"la couleur",a_scale:"la taille",a_dots:"les points",
+h_focus:"Concentrez-vous sur {0}.",h_hard:"Comparez les voisins une propriété à la fois. Toutes ne changent pas au même rythme.",
+r_cw:"le repère tourne de {0}° dans le sens horaire à chaque étape",r_ccw:"le repère tourne de {0}° dans le sens antihoraire à chaque étape",r_up:"il gagne un côté à chaque étape",r_down:"il perd un côté à chaque étape",r_slow:"il gagne un côté toutes les deux étapes",r_fill:"la couleur se répète selon un cycle de {0}",r_grow:"il grandit d’une quantité constante",r_shrink:"il rétrécit d’une quantité constante",r_dot:"il gagne un point à chaque étape",r_fib:"les points suivent 1, 1, 2, 3, 5 (Fibonacci)",
+n_add:"Ajoutez {0} à chaque fois.",n_sub:"Soustrayez {0} à chaque fois.",n_mul:"Multipliez par {0} à chaque fois.",n_sq:"Ce sont des carrés parfaits.",n_grow:"Le pas augmente de {0} à chaque fois ({1}, {2}, {3}…).",n_dbl:"Doublez le nombre, puis ajoutez {0}.",n_fib:"Chaque nombre est la somme des deux précédents.",n_alt:"Ajoutez {0}, soustrayez {1}, et recommencez.",n_tri:"Nombres triangulaires : l’écart augmente de 1 à chaque fois.",n_sqp:"Carrés parfaits plus 1.",n_sqm:"Carrés parfaits moins 1.",n_cube:"Cubes parfaits.",n_prime:"Nombres premiers consécutifs.",n_fact:"Multipliez par 2, 3, 4, 5, 6 : le multiplicateur augmente de un.",n_inter:"Deux suites entrelacées : les rangs 1, 3, 5 ajoutent {0} ; les rangs 2, 4, 6 soustraient {1}.",n_gap:"L’écart double à chaque fois.",n_fib1:"Chaque nombre est la somme des deux précédents, plus 1.",n_dbl1:"Doublez, puis ajoutez 1, en alternance.",
+hn_diff:"Regardez les écarts entre nombres voisins.",hn_mul:"Chaque nombre vient-il d’une addition ou d’une multiplication ?",hn_pow:"Pensez à un nombre multiplié par lui-même.",hn_ops:"Deux opérations sont combinées.",hn_add:"Essayez d’additionner les voisins.",hn_alt:"L’opération alterne.",hn_prime:"Chaque nombre n’a que deux diviseurs.",hn_ratio:"Regardez les rapports, pas les écarts.",hn_every2:"Essayez de lire un nombre sur deux.",hn_second:"Regardez les écarts des écarts.",
+m_latin:"Chaque ligne et chaque colonne contient une fois chaque forme et une fois chaque couleur.",hm_latin:"Repérez la forme et la couleur qui manquent dans la dernière ligne et la dernière colonne.",m_dots:"Dans chaque ligne, la troisième forme a autant de points que les deux premières réunies.",hm_dots:"Comptez les points de chaque ligne.",m_rot:"Chaque pas vers la droite fait tourner le repère de {0}°, et chaque pas vers le bas de {1}°.",hm_rot:"Suivez le repère blanc le long d’une ligne, puis le long d’une colonne.",
+mb_intro:"Vous allez noter 24 affirmations de « Pas du tout d’accord » à « Tout à fait d’accord ». Il n’y a pas de bonnes réponses, et chaque trait comporte des affirmations des deux côtés : vous n’êtes jamais forcé(e) de choisir entre deux options.",
+mb_warn:"🧭 Cette réflexion sert à mieux se connaître, ce n’est pas une évaluation clinique ni un diagnostic. Les types sont des tendances sur un spectre, pas des cases, et ils peuvent évoluer avec le contexte et le temps.",
+mb_begin:"Commencer",mb_stmt:"Affirmation {0} sur {1}",prev:"← Précédent",
+rp_h:"Votre réflexion",rp_dims:"Vos quatre dimensions",rp_ov:"Vue d’ensemble",rp_radar:"Graphique radar des pourcentages de vos huit traits",
+rp_conf:"Confiance : {0} dimensions sur 4 sont nettes (modérées ou fortes). {1}",rp_c4:"Votre profil est assez marqué.",rp_c2:"Certaines dimensions sont proches du milieu : considérez les lettres comme des tendances.",rp_c0:"La plupart des dimensions sont proches du milieu : vous adaptez sans doute votre style à la situation.",
+rp_mid:" Cette dimension étant proche du milieu ({0} % / {1} %), vous utilisez probablement aussi le style opposé ({2}) quand il convient.",
+rp_str:"Atouts",rp_bl:"Angles morts possibles",rp_gr:"Pistes de progression",rp_infl:"Quelles réponses ont pesé ?",rp_push:"« {0} » ({1}) vous a poussé(e) vers {2}.",rp_pull:"« {0} » ({1}) a tiré dans l’autre sens.",rp_none:"Aucune réponse ne penchait nettement de ce côté.",
+rp_how:"Comment est-ce calculé ?",rp_howt:"Chaque dimension compte 6 affirmations, 3 pour chaque côté. Répondre « d’accord » vous rapproche du côté décrit, « pas d’accord » vous en éloigne. Les scores vont de −12 à +12. Un écart de 0 à 2 est limite, de 3 à 5 léger, de 6 à 8 modéré et de 9 à 12 fort.",
+rp_warn:"🧭 Ce résultat sert uniquement à la réflexion personnelle. Ce n’est pas une évaluation clinique ni un diagnostic, et il ne peut prédire ni les aptitudes, ni la réussite professionnelle, ni la santé mentale.",
+c0:"Limite",c1:"Léger",c2:"Modéré",c3:"Fort",
+LK:["Pas du tout d’accord","Pas d’accord","Neutre","D’accord","Tout à fait d’accord"],
+Q:["Je me sens revigoré(e) après un moment dans un groupe animé.","J’ai besoin de calme et de solitude pour récupérer après une journée chargée.","Je réfléchis souvent mieux en parlant à voix haute.","Je préfère les discussions profondes à deux aux grandes réunions.","J’engage facilement la conversation avec des inconnus.","Je réfléchis généralement avec soin avant de parler.","Je fais plus confiance aux faits concrets et à l’expérience qu’à l’intuition.","Je suis attiré(e) par les schémas, les théories et les possibilités.","Je remarque de petits détails pratiques que les autres manquent.","Mon esprit saute souvent vers des idées et des liens futurs.","J’aime les consignes claires, étape par étape.","J’aime expérimenter sans méthode fixe.","Dans un désaccord, je me concentre sur ce qui est logiquement juste.","Je pense d’abord à l’effet d’une décision sur les sentiments des gens.","Je peux mettre mes émotions de côté pour trancher.","Je sens ce que les autres ressentent sans qu’on me le dise.","Je valorise l’équité et la cohérence plus que les exceptions au cas par cas.","J’enfreindrais une règle pour protéger quelqu’un qui compte pour moi.","Je me sens mieux quand ma journée suit un plan clair.","J’aime garder mes options ouvertes le plus longtemps possible.","Je termine mes tâches bien avant l’échéance.","Je travaille mieux dans des élans de dernière minute.","J’aime que les décisions soient réglées et closes.","J’aime m’adapter quand les plans changent."],
+L:{E:["Extraversion","Vous puisez souvent votre énergie dans les gens et l’action, et vous pensez en parlant.","Vous créez vite des liens et donnez de l’élan aux groupes.","Vous pouvez parler avant de réfléchir, ou trouver la solitude prolongée épuisante.","Ajoutez de courtes pauses pour réfléchir avant les grandes décisions."],
+I:["Introversion","Vous vous ressourcez plutôt seul(e) ou en petit comité et réfléchissez avant de parler.","Vous écoutez profondément et apportez concentration et profondeur à votre travail.","Vos idées peuvent rester tues, et votre calme peut être pris pour du désintérêt.","Partagez vos idées à peine formées pour que les autres puissent les enrichir."],
+S:["Sensation","Vous faites plutôt confiance aux faits concrets, à l’expérience et à ce qui est observable.","Vous êtes pratique, observateur(trice) et doué(e) pour concrétiser les idées.","Vous pouvez écarter des idées non prouvées ou manquer la vue d’ensemble.","Prenez le temps de vous demander : « Que pourrait-ce signifier d’autre ? »"],
+N:["Intuition","Vous cherchez plutôt les schémas, le sens et les possibilités futures.","Vous générez des idées et reliez des choses qui semblent sans rapport.","Vous pouvez négliger les détails pratiques ou perdre goût au suivi routinier.","Transformez chaque grande idée en une prochaine étape concrète."],
+T:["Pensée","Vous décidez plutôt par la logique, la cohérence et des critères objectifs.","Vous analysez clairement et restez stable sous pression.","Votre franchise peut paraître froide et vous sous-estimez parfois les données émotionnelles.","Nommez à voix haute l’impact humain d’une décision avant de la finaliser."],
+F:["Sentiment","Vous décidez plutôt selon vos valeurs, l’empathie et l’impact sur les personnes.","Vous inspirez confiance et percevez ce dont les autres ont besoin.","Vous pouvez éviter un conflit nécessaire ou prendre les critiques à cœur.","Entraînez-vous à donner un retour honnête avec bienveillance plutôt que de le repousser."],
+J:["Jugement","Vous préférez plutôt la structure, les plans et la clôture.","Vous êtes fiable, organisé(e) et allez au bout de ce que vous commencez.","Vous pouvez résister au changement ou décider trop tôt.","Prévoyez un peu de marge dans vos plans pour mieux vivre les imprévus."],
+P:["Perception","Vous préférez plutôt la souplesse, la spontanéité et les options ouvertes.","Vous vous adaptez vite et gérez bien l’inattendu.","Vous pouvez repousser les décisions ou laisser des tâches inachevées.","Fixez de petites échéances pour transformer les options en engagements."]},
+D:{INTJ:"Stratégique, indépendant, analytique et tourné vers l’avenir.",INTP:"Curieux, analytique, créatif et passionné d’idées.",ENTJ:"Confiant, organisé, stratégique et orienté objectifs.",ENTP:"Créatif, curieux, énergique et aime défier les idées.",INFJ:"Perspicace, réfléchi, idéaliste et empathique.",INFP:"Imaginatif, sensible, idéaliste et guidé par ses valeurs.",ENFJ:"Sociable, solidaire, organisé et motivant.",ENFP:"Énergique, créatif, curieux et enthousiaste.",ISTJ:"Responsable, organisé, pratique et fiable.",ISFJ:"Attentionné, soigneux, loyal et responsable.",ESTJ:"Organisé, pratique, direct et responsable.",ESFJ:"Amical, coopératif, responsable et sociable.",ISTP:"Pratique, indépendant, calme et bon pour résoudre les problèmes.",ISFP:"Discret, souple, créatif et sensible.",ESTP:"Énergique, pratique, spontané et tourné vers l’action.",ESFP:"Sociable, énergique, spontané et enthousiaste."},
+card:"Carte {0}",mem_done:"Toutes les paires trouvées en {0} coups !",echo_round:"Manche {0}",echo_watch:"Observez la séquence…",echo_you:"À vous !",echo_over:"Partie terminée. Vous avez terminé {0} manches.",
+shuffle:"Mélanger",slide_win:"Résolu en {0} coups !",math_intro:"Résolvez-en un maximum en {0} secondes. Une mauvaise réponse coûte 3 secondes.",math_ok:"Correctes : {0}",math_done:"Temps écoulé ! {0} correctes.",
+lights_goal:"Éteignez toutes les lumières. Chaque pression inverse la lumière touchée et ses voisines.",lights_win:"Tout est éteint ! Résolu en {0} coups.",lights_new:"Nouvelle grille",
+react_intro:"Touchez le carré dès qu’il devient vert. Cinq manches.",react_tap:"Touchez pour commencer",react_wait:"Attendez le vert…",react_go:"Touchez maintenant !",react_early:"Trop tôt ! Touchez pour réessayer.",react_ms:"{0} ms. Touchez pour la manche suivante.",react_round:"Manche {0} sur 5",react_done:"Moyenne sur 5 : {0} ms"
+});
+
+
+I18N.add("en",{
+ht6:"Earn XP by finishing games, level up, unlock achievements and complete the daily challenge. Everything is stored only on this device.",
+lvl:"Level {0}",xp_into:"{0} / {1} XP",xp_gain:"+{0} XP",lvl_up:"🎉 Level up! You reached level {0}.",ach_new:"🏅 Achievement unlocked: {0}",
+daily_h:"Daily challenge",daily_done:"✓ Done today (+{0} XP)",daily_go:"Play",daily_streak:"Daily streak",daily_bonus:"📅 Daily challenge completed! +{0} XP bonus.",
+d_logic:"Score at least {0}% in Shape Logic ({1} level).",d_mem:"Finish Memory Match (Easy) in {0} moves or fewer.",d_echo:"Complete {0} rounds in Pattern Echo.",d_slide:"Solve the 3×3 Sliding Tiles in {0} moves or fewer.",d_math:"Answer {0} sums correctly in Math Sprint.",d_lights:"Solve Lights Out in {0} moves or fewer.",d_react:"Average under {0} ms in the Reaction Test.",
+pr_xp_total:"Total XP",pr_dbest:"Best daily streak",pr_ach:"Achievements ({0}/{1})",pr_locked:"Locked",pr_hist:"Recent runs",pr_hist_empty:"No runs yet.",pr_stats:"Statistics",pr_bests:"Best scores",pr_xp_how:"How does XP work?",
+pr_nostore:"⚠️ This browser is blocking local storage, so your progress cannot be saved after you close the page.",pr_migrated:"Your older saved progress was imported.",pr_recovered:"Your saved progress file was damaged, so it was rebuilt from older data.",
+xr_logic:"Shape Logic: (10 + 4 × correct answers) × level multiplier (1, 1.5, 2, 3).",xr_mb:"Personality Reflection: 25 XP, once per day.",xr_mem:"Memory Match: 20 XP, plus up to 20 for finishing with few extra moves.",xr_echo:"Pattern Echo: 5 XP per completed round.",xr_slide:"Sliding Tiles: 30 XP (3×3) or 60 XP (4×4), +10 for an efficient solution.",xr_math:"Math Sprint: 2 XP per correct answer.",xr_lights:"Lights Out: 30 XP, +15 if solved in 15 moves or fewer.",xr_react:"Reaction Test: 25 XP, +10 for an average under 300 ms.",xr_daily:"Daily challenge: +50 XP once per day. XP is only awarded for finished runs, and each run is rewarded once.",
+dlg_exit_t:"Leave this game?",dlg_exit_p:"Your current run will be lost and no XP will be awarded.",dlg_leave:"Leave",dlg_stay:"Stay",dlg_clr_t:"Erase saved progress?",dlg_clr_p:"XP, level, achievements, best scores and history will be permanently erased from this device. Your language and settings are kept.",dlg_clr_ok:"Erase",
+gi_mem:"Flip two cards at a time. Matching pairs stay open.",gi_echo:"Watch the lights, then repeat the pattern in order. Keys 1–4 work too.",gi_slide:"Tap a tile next to the gap to slide it. Arrow keys move a tile into the gap.",gi_math:"Pick the correct result. Keys 1–4 choose an answer.",
+react_list:"Rounds: {0}",react_best:"Best round: {0} ms",ann_pair:"Pair found",
+ach_first:"First Steps",achd_first:"Finish any game.",ach_perfect:"Flawless Logic",achd_perfect:"Answer all 10 puzzles correctly in a Shape Logic run.",ach_master:"Master Mind",achd_master:"Score 70% or more on the Master level.",ach_sharp:"Sharp Memory",achd_sharp:"Finish Memory Match (Hard) in 14 moves or fewer.",ach_echo8:"Echo Chamber",achd_echo8:"Complete 8 rounds in Pattern Echo.",ach_slide4:"Tile Tamer",achd_slide4:"Solve a 4×4 Sliding Tiles board.",ach_math20:"Mental Calculator",achd_math20:"Answer 20 sums correctly in Math Sprint.",ach_lights20:"Night Owl",achd_lights20:"Solve Lights Out in 20 moves or fewer.",ach_react300:"Quick Reflexes",achd_react300:"Average under 300 ms in the Reaction Test.",ach_mirror:"Self-Reflection",achd_mirror:"Complete the Personality Reflection.",ach_allround:"All-Rounder",achd_allround:"Play all eight games at least once.",ach_daily3:"Daily Devotion",achd_daily3:"Complete the daily challenge 3 days in a row.",ach_lvl5:"Rising Star",achd_lvl5:"Reach player level 5.",ach_dedicated:"Dedicated",achd_dedicated:"Finish 25 runs."
+});
+
+I18N.add("ar",{
+ht6:"اكسب نقاط خبرة بإنهاء الألعاب، وارتقِ بالمستوى، وافتح الإنجازات، وأكمل تحدي اليوم. كل شيء يُحفظ على هذا الجهاز فقط.",
+lvl:"المستوى {0}",xp_into:"{0} / {1} نقطة خبرة",xp_gain:"+{0} نقطة خبرة",lvl_up:"🎉 ارتقيت! بلغت المستوى {0}.",ach_new:"🏅 إنجاز جديد: {0}",
+daily_h:"تحدي اليوم",daily_done:"✓ أُنجز اليوم (+{0} نقطة خبرة)",daily_go:"العب",daily_streak:"سلسلة الأيام",daily_bonus:"📅 أكملت تحدي اليوم! مكافأة +{0} نقطة خبرة.",
+d_logic:"احصل على {0}% على الأقل في منطق الأشكال (المستوى {1}).",d_mem:"أنهِ تطابق الذاكرة (سهل) في {0} حركة أو أقل.",d_echo:"أكمل {0} جولات في صدى النمط.",d_slide:"حلّ البلاطات المنزلقة 3×3 في {0} حركة أو أقل.",d_math:"أجب عن {0} عمليات بشكل صحيح في سباق الحساب.",d_lights:"حلّ إطفاء الأضواء في {0} حركة أو أقل.",d_react:"متوسط أقل من {0} م.ث في اختبار ردّ الفعل.",
+pr_xp_total:"مجموع نقاط الخبرة",pr_dbest:"أفضل سلسلة أيام",pr_ach:"الإنجازات ({0}/{1})",pr_locked:"مقفل",pr_hist:"آخر المحاولات",pr_hist_empty:"لا توجد محاولات بعد.",pr_stats:"الإحصاءات",pr_bests:"أفضل النتائج",pr_xp_how:"كيف تعمل نقاط الخبرة؟",
+pr_nostore:"⚠️ هذا المتصفح يمنع التخزين المحلي، لذا لن يُحفظ تقدّمك بعد إغلاق الصفحة.",pr_migrated:"تم استيراد تقدّمك المحفوظ سابقاً.",pr_recovered:"كان ملف تقدّمك المحفوظ تالفاً، فأُعيد بناؤه من بيانات أقدم.",
+xr_logic:"منطق الأشكال: (10 + 4 × الإجابات الصحيحة) × معامل المستوى (1 و1.5 و2 و3).",xr_mb:"تأمل الشخصية: 25 نقطة خبرة، مرة واحدة في اليوم.",xr_mem:"تطابق الذاكرة: 20 نقطة، وحتى 20 إضافية عند الإنهاء بأقل حركات زائدة.",xr_echo:"صدى النمط: 5 نقاط عن كل جولة مكتملة.",xr_slide:"البلاطات المنزلقة: 30 نقطة (3×3) أو 60 (4×4)، و+10 لحل اقتصادي.",xr_math:"سباق الحساب: نقطتان عن كل إجابة صحيحة.",xr_lights:"إطفاء الأضواء: 30 نقطة، و+15 إن حُلّت في 15 حركة أو أقل.",xr_react:"اختبار ردّ الفعل: 25 نقطة، و+10 لمتوسط أقل من 300 م.ث.",xr_daily:"تحدي اليوم: +50 نقطة مرة واحدة يومياً. تُمنح نقاط الخبرة للمحاولات المكتملة فقط، وتُكافأ كل محاولة مرة واحدة.",
+dlg_exit_t:"مغادرة اللعبة؟",dlg_exit_p:"ستضيع محاولتك الحالية ولن تُمنح أي نقاط خبرة.",dlg_leave:"مغادرة",dlg_stay:"البقاء",dlg_clr_t:"مسح التقدم المحفوظ؟",dlg_clr_p:"ستُمسح نقاط الخبرة والمستوى والإنجازات وأفضل النتائج والسجل نهائياً من هذا الجهاز. تبقى لغتك وإعداداتك.",dlg_clr_ok:"مسح",
+gi_mem:"اقلب بطاقتين في كل مرة. الأزواج المتطابقة تبقى مفتوحة.",gi_echo:"راقب الأضواء ثم كرّر النمط بالترتيب. تعمل المفاتيح 1–4 أيضاً.",gi_slide:"اضغط على بلاطة بجوار الفراغ لتحريكها. أسهم الاتجاه تحرّك بلاطة إلى الفراغ.",gi_math:"اختر النتيجة الصحيحة. المفاتيح 1–4 تختار الإجابة.",
+react_list:"الجولات: {0}",react_best:"أفضل جولة: {0} م.ث",ann_pair:"تم العثور على زوج",
+ach_first:"الخطوات الأولى",achd_first:"أنهِ أي لعبة.",ach_perfect:"منطق بلا أخطاء",achd_perfect:"أجب عن الألغاز العشرة كلها بشكل صحيح في جولة منطق الأشكال.",ach_master:"عقل أستاذ",achd_master:"احصل على 70% أو أكثر في مستوى الأستاذ.",ach_sharp:"ذاكرة حادة",achd_sharp:"أنهِ تطابق الذاكرة (صعب) في 14 حركة أو أقل.",ach_echo8:"غرفة الصدى",achd_echo8:"أكمل 8 جولات في صدى النمط.",ach_slide4:"مروّض البلاطات",achd_slide4:"حلّ لوحة البلاطات المنزلقة 4×4.",ach_math20:"حاسب ذهني",achd_math20:"أجب عن 20 عملية بشكل صحيح في سباق الحساب.",ach_lights20:"بومة الليل",achd_lights20:"حلّ إطفاء الأضواء في 20 حركة أو أقل.",ach_react300:"ردود أفعال سريعة",achd_react300:"متوسط أقل من 300 م.ث في اختبار ردّ الفعل.",ach_mirror:"تأمل ذاتي",achd_mirror:"أكمل تأمل الشخصية.",ach_allround:"لاعب شامل",achd_allround:"العب الألعاب الثماني كلها مرة واحدة على الأقل.",ach_daily3:"مواظبة يومية",achd_daily3:"أكمل تحدي اليوم 3 أيام متتالية.",ach_lvl5:"نجم صاعد",achd_lvl5:"بلغ المستوى 5.",ach_dedicated:"مثابر",achd_dedicated:"أنهِ 25 محاولة."
+});
+
+I18N.add("fr",{
+ht6:"Gagnez de l’XP en terminant des jeux, montez de niveau, débloquez des succès et relevez le défi du jour. Tout est stocké uniquement sur cet appareil.",
+lvl:"Niveau {0}",xp_into:"{0} / {1} XP",xp_gain:"+{0} XP",lvl_up:"🎉 Niveau supérieur ! Vous avez atteint le niveau {0}.",ach_new:"🏅 Succès débloqué : {0}",
+daily_h:"Défi du jour",daily_done:"✓ Terminé aujourd’hui (+{0} XP)",daily_go:"Jouer",daily_streak:"Série de jours",daily_bonus:"📅 Défi du jour accompli ! Bonus de +{0} XP.",
+d_logic:"Obtenez au moins {0} % en Logique des formes (niveau {1}).",d_mem:"Terminez Paires mémoire (facile) en {0} coups ou moins.",d_echo:"Terminez {0} manches dans Écho de motifs.",d_slide:"Résolvez le Taquin 3×3 en {0} coups ou moins.",d_math:"Répondez correctement à {0} calculs au Sprint de calcul.",d_lights:"Résolvez Lights Out en {0} coups ou moins.",d_react:"Moyenne inférieure à {0} ms au Test de réaction.",
+pr_xp_total:"XP total",pr_dbest:"Meilleure série de jours",pr_ach:"Succès ({0}/{1})",pr_locked:"Verrouillé",pr_hist:"Dernières parties",pr_hist_empty:"Aucune partie pour l’instant.",pr_stats:"Statistiques",pr_bests:"Meilleurs scores",pr_xp_how:"Comment fonctionne l’XP ?",
+pr_nostore:"⚠️ Ce navigateur bloque le stockage local : votre progression ne sera pas conservée après la fermeture de la page.",pr_migrated:"Votre ancienne progression enregistrée a été importée.",pr_recovered:"Votre fichier de progression était endommagé ; il a été reconstruit à partir d’anciennes données.",
+xr_logic:"Logique des formes : (10 + 4 × bonnes réponses) × multiplicateur de niveau (1 ; 1,5 ; 2 ; 3).",xr_mb:"Réflexion sur la personnalité : 25 XP, une fois par jour.",xr_mem:"Paires mémoire : 20 XP, plus jusqu’à 20 pour une partie avec peu de coups superflus.",xr_echo:"Écho de motifs : 5 XP par manche terminée.",xr_slide:"Taquin : 30 XP (3×3) ou 60 XP (4×4), +10 pour une solution efficace.",xr_math:"Sprint de calcul : 2 XP par bonne réponse.",xr_lights:"Lights Out : 30 XP, +15 si résolu en 15 coups ou moins.",xr_react:"Test de réaction : 25 XP, +10 pour une moyenne inférieure à 300 ms.",xr_daily:"Défi du jour : +50 XP une fois par jour. L’XP n’est attribuée que pour les parties terminées, et chaque partie n’est récompensée qu’une fois.",
+dlg_exit_t:"Quitter ce jeu ?",dlg_exit_p:"Votre partie en cours sera perdue et aucun XP ne sera attribué.",dlg_leave:"Quitter",dlg_stay:"Rester",dlg_clr_t:"Effacer la progression ?",dlg_clr_p:"L’XP, le niveau, les succès, les meilleurs scores et l’historique seront définitivement effacés de cet appareil. Votre langue et vos réglages sont conservés.",dlg_clr_ok:"Effacer",
+gi_mem:"Retournez deux cartes à la fois. Les paires identiques restent visibles.",gi_echo:"Observez les lumières, puis répétez la séquence dans l’ordre. Les touches 1–4 fonctionnent aussi.",gi_slide:"Touchez une tuile à côté du vide pour la glisser. Les flèches déplacent une tuile dans le vide.",gi_math:"Choisissez le bon résultat. Les touches 1–4 sélectionnent une réponse.",
+react_list:"Manches : {0}",react_best:"Meilleure manche : {0} ms",ann_pair:"Paire trouvée",
+ach_first:"Premiers pas",achd_first:"Terminez n’importe quel jeu.",ach_perfect:"Logique impeccable",achd_perfect:"Répondez correctement aux 10 énigmes d’une partie de Logique des formes.",ach_master:"Esprit maître",achd_master:"Obtenez 70 % ou plus au niveau Maître.",ach_sharp:"Mémoire aiguisée",achd_sharp:"Terminez Paires mémoire (difficile) en 14 coups ou moins.",ach_echo8:"Chambre d’écho",achd_echo8:"Terminez 8 manches dans Écho de motifs.",ach_slide4:"Dompteur de tuiles",achd_slide4:"Résolvez un Taquin 4×4.",ach_math20:"Calculateur mental",achd_math20:"Répondez correctement à 20 calculs au Sprint de calcul.",ach_lights20:"Oiseau de nuit",achd_lights20:"Résolvez Lights Out en 20 coups ou moins.",ach_react300:"Réflexes rapides",achd_react300:"Moyenne inférieure à 300 ms au Test de réaction.",ach_mirror:"Introspection",achd_mirror:"Terminez la Réflexion sur la personnalité.",ach_allround:"Touche-à-tout",achd_allround:"Jouez aux huit jeux au moins une fois.",ach_daily3:"Assiduité quotidienne",achd_daily3:"Accomplissez le défi du jour 3 jours de suite.",ach_lvl5:"Étoile montante",achd_lvl5:"Atteignez le niveau 5.",ach_dedicated:"Persévérant",achd_dedicated:"Terminez 25 parties."
+});
+
+/*PUZ-START*/
+const PuzzleEngine=(()=>{
+const S=(n,rot=0,fill=0,sc=1,dots=0,mark=0)=>[n,rot,fill,sc,dots,mark];
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function buildBanks(seed=2026){
+  const r=rng(seed),ri=(a,b)=>a+Math.floor(r()*(b-a+1)),pick=a=>a[Math.floor(r()*a.length)];
+  const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const K=x=>JSON.stringify(x);
+  const mk=(seq,ans,cands,why,hint,mx)=>{const ak=K(ans),m=new Map();cands.forEach(c=>{if(K(c)!==ak)m.set(K(c),c)});
+    const w=sh([...m.values()]);return w.length<5?null:{seq,ans,w:w.slice(0,5),why,hint,mx}};
+  function shape(nr){
+    let at;do at=sh(["rot","sides","fill","scale","dots"]).slice(0,nr);while(at.includes("scale")&&at.includes("dots"));
+    const F={},T=[],n=ri(3,6),f=ri(1,3),base={rot:0,sides:n,fill:f,scale:1,dots:0};
+    if(at.includes("rot")){const s=pick([30,45,60,75])*pick([1,-1]);F.rot=k=>((s*k)%360+360)%360;T.push([s>0?"r_cw":"r_ccw",Math.abs(s)])}
+    if(at.includes("sides")){const v=pick(["up","down","slow"]),n0=ri(3,4);F.sides=v==="up"?k=>n0+k:v==="down"?k=>8-k:k=>n0+(k>>1);
+      T.push([v==="up"?"r_up":v==="down"?"r_down":"r_slow"])}
+    if(at.includes("fill")){const m=pick([2,3]),cy=sh([0,1,2,3]).slice(0,m);F.fill=k=>cy[k%m];T.push(["r_fill",m])}
+    if(at.includes("scale")){const g=pick([1,-1]);F.scale=k=>+(g>0?.4+.15*k:1-.15*k).toFixed(2);T.push([g>0?"r_grow":"r_shrink"])}
+    if(at.includes("dots")){const fb=pick([0,1]),d0=ri(1,2);F.dots=fb?k=>[1,1,2,3,5,8,13][k]:k=>d0+k;T.push([fb?"r_fib":"r_dot"])}
+    const val=(a,k)=>F[a]?F[a](k):base[a],spec=(k,o={})=>{const v=a=>a in o?o[a]:val(a,k);return S(v("sides"),v("rot"),v("fill"),v("scale"),v("dots"),F.rot?1:0)};
+    const c=[];at.forEach(a=>[3,5,2,1].forEach(kk=>{const v=val(a,kk);if(a==="dots"&&v>6)return;c.push(spec(4,{[a]:v}))}));
+    if(!F.fill)c.push(spec(4,{fill:f%3+1}),spec(4,{fill:0}));
+    if(!F.sides)c.push(spec(4,{sides:n+1}),spec(4,{sides:Math.max(3,n-1)}));
+    if(!F.scale&&!F.dots)c.push(spec(4,{scale:.7}));
+    if(at.length>1&&!(at.includes("dots")&&val("dots",5)>6))c.push(spec(4,{[at[0]]:val(at[0],3),[at[1]]:val(at[1],5)}));
+    return mk([0,1,2,3].map(k=>spec(k)),spec(4),c,["rules",T],nr<=2?["h_focus",at]:["h_hard"])
+  }
+  const sn=(t,ans,why,hint=["hn_diff"])=>{const l=t[t.length-1],d=l-t[t.length-2];
+    return mk(t,ans,[ans+1,ans-1,ans+2,ans-2,ans+3,ans-3,l+d,l*2,ans+10],why,hint)};
+  const A5=[0,1,2,3,4],P=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+  const grow=(a,fn,n=6)=>{const t=[a];while(t.length<n)t.push(fn(t.length-1,t));return t};
+  const NB=[
+    ()=>{const a=ri(2,15),d=ri(2,9);return sn(A5.map(k=>a+d*k),a+d*5,["n_add",d])},
+    ()=>{const a=ri(1,4),m=pick([2,3]);return sn(A5.map(k=>a*m**k),a*m**5,["n_mul",m],["hn_mul"])},
+    ()=>{const o=ri(0,3);return sn([1,2,3,4,5].map(k=>(k+o)**2),(6+o)**2,["n_sq"],["hn_pow"])},
+    ()=>{const a=ri(45,90),d=ri(3,8);return sn(A5.map(k=>a-d*k),a-d*5,["n_sub",d])}];
+  const NA=[
+    ()=>{const d=ri(1,4),s=ri(1,3),t=grow(ri(1,10),(k,t)=>t[k]+d+s*k);return sn(t.slice(0,5),t[5],["n_grow",s,d,d+s,d+2*s])},
+    ()=>{const c=ri(1,3),t=grow(ri(1,3),(k,t)=>t[k]*2+c);return sn(t.slice(0,5),t[5],["n_dbl",c],["hn_ops"])},
+    ()=>{const t=[ri(1,4),ri(1,5)];while(t.length<6)t.push(t[t.length-1]+t[t.length-2]);return sn(t.slice(0,5),t[5],["n_fib"],["hn_add"])},
+    ()=>{const a=ri(5,9),b=ri(2,4),t=grow(ri(10,20),(k,t)=>t[k]+(k%2?-b:a));return sn(t.slice(0,5),t[5],["n_alt",a,b],["hn_alt"])}];
+  const NE=[
+    ()=>{const o=ri(0,3),T=n=>n*(n+1)/2;return sn([1,2,3,4,5].map(k=>T(k+o)),T(6+o),["n_tri"])},
+    ()=>{const s=pick([-1,1]),o=ri(1,3);return sn(A5.map(k=>(k+o)**2+s),(5+o)**2+s,[s>0?"n_sqp":"n_sqm"],["hn_pow"])},
+    ()=>{const o=pick([1,2]);return sn(A5.map(k=>(k+o)**3),(5+o)**3,["n_cube"],["hn_pow"])},
+    ()=>{const s=ri(0,6);return sn(P.slice(s,s+5),P[s+5],["n_prime"],["hn_prime"])},
+    ()=>{const t=grow(pick([1,2]),(k,t)=>t[k]*(k+2));return sn(t.slice(0,5),t[5],["n_fact"],["hn_ratio"])}];
+  const NM=[
+    ()=>{const s1=ri(1,9),s2=ri(25,40),a=ri(2,5),b=ri(2,6),t=[0,1,2,3,4,5,6].map(k=>k%2?s2-b*((k-1)/2):s1+a*(k/2));return sn(t.slice(0,6),t[6],["n_inter",a,b],["hn_every2"])},
+    ()=>{const d=ri(1,3),t=grow(ri(1,5),(k,t)=>t[k]+d*2**k);return sn(t.slice(0,5),t[5],["n_gap"],["hn_second"])},
+    ()=>{const t=[ri(1,4),ri(1,5)];while(t.length<6)t.push(t[t.length-1]+t[t.length-2]+1);return sn(t.slice(0,5),t[5],["n_fib1"],["hn_add"])},
+    ()=>{const t=grow(ri(1,3),(k,t)=>k%2?t[k]+1:t[k]*2);return sn(t.slice(0,5),t[5],["n_dbl1"],["hn_alt"])}];
+  const cellsToP=(cells,cands,why,hint)=>mk(cells.slice(0,8),cells[8],cands,why,hint,true);
+  const MX=[
+    ()=>{const sd=sh([3,4,5,6]).slice(0,3),fl=sh([1,2,3]),c=(R,C)=>S(sd[(R+C)%3],0,fl[(2*R+C)%3]),cells=[];
+      for(let R=0;R<3;R++)for(let C=0;C<3;C++)cells.push(c(R,C));
+      const cands=[];sd.forEach(s=>fl.forEach(f=>cands.push(S(s,0,f))));return cellsToP(cells,cands,["m_latin"],["hm_latin"])},
+    ()=>{const sd=sh([3,4,5]),fl=sh([1,2,3]),cells=[],ds=[];
+      for(let R=0;R<3;R++){let a,b;do{a=ri(1,4);b=ri(1,4)}while(a+b>6||a===b);ds.push([a,b,a+b]);ds[R].forEach((d,C)=>cells.push(S(sd[R],0,fl[R],1,d)))}
+      const x=ds[2],cands=[1,2,3,4,5,6].map(d=>S(sd[2],0,fl[2],1,d));cands.push(S(sd[1],0,fl[2],1,x[2]),S(sd[2],0,fl[1],1,x[2]));
+      return cellsToP(cells,cands,["m_dots"],["hm_dots"])},
+    ()=>{const n=pick([3,4,5]),f=ri(1,3),sc=pick([30,45,60]),sr=pick([15,20,25,35]),rot=(R,C)=>(R*sr+C*sc)%360,cells=[];
+      for(let R=0;R<3;R++)for(let C=0;C<3;C++)cells.push(S(n,rot(R,C),f,1,0,1));
+      const a=rot(2,2),cands=[a+sr,a-sr,a+sc,a-sc,a+15,a-15,a+sr+sc].map(v=>S(n,((v%360)+360)%360,f,1,0,1));
+      return cellsToP(cells,cands,["m_rot",sc,sr],["hm_rot"])}];
+  const fill=(n,gen)=>{const out=[],seen=new Set();let g=0;while(out.length<n&&g++<800){const p=gen();if(!p)continue;const k=K([p.seq,p.ans]);if(seen.has(k))continue;seen.add(k);out.push(p)}return out};
+  const mix=(nr,NF)=>()=>r()<.7?shape(nr):pick(NF)();
+  return[fill(20,mix(1,NB)),fill(20,mix(2,NA)),fill(20,mix(3,NE)),
+    fill(20,()=>{const u=r();return u<.45?pick(MX)():u<.75?shape(4):pick(NM)()})];
+}
+return{buildBanks};
+})();
+/*PUZ-END*/
+/*LOGIC-START*/
+const OracleLogic=(()=>{
+  const GAMES=["logic","mb","mem","echo","slide","math","lights","react"];
+  const BESTKEYS=["logic-0","logic-1","logic-2","logic-3","mem-easy","mem-hard","echo","slide-3","slide-4","math","lights","react"];
+  const UNITS=["u_moves","u_ms","u_rounds","u_ok","u_pct"];
+  const DATE_RE=/^\d{4}-\d{2}-\d{2}$/,TYPE_RE=/^[EI][SN][TF][JP]$/;
+  const DAILY_BONUS=50,MAXHIST=20,LM=[1,1.5,2,3];
+  const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+  const int=(v,d=0,max=1e9)=>{const n=Number(v);return Number.isFinite(n)?clamp(Math.floor(n),0,max):d};
+  const num=v=>typeof v==="number"&&Number.isFinite(v)&&v>=0?Math.round(v):null;
+
+  /* ---------- levels and XP ---------- */
+  const stepXp=n=>100+50*(n-1);
+  function levelInfo(xp){xp=int(xp);let level=1,rem=xp;while(rem>=stepXp(level)){rem-=stepXp(level);level++}
+    return{level,into:rem,need:stepXp(level),pct:Math.round(rem/stepXp(level)*100)}}
+  function xpFor(g,r){r=r||{};
+    switch(g){
+      case"logic":return Math.round((10+4*int(r.ok,0,10))*(LM[clamp(int(r.lv),0,3)]));
+      case"mb":return 25;
+      case"mem":return 20+Math.max(0,20-2*Math.max(0,int(r.moves)-int(r.pairs)));
+      case"echo":return 5*int(r.rounds,0,500);
+      case"slide":return (r.n===4?60:30)+(int(r.moves)<=(r.n===4?64:36)?10:0);
+      case"math":return 2*int(r.ok,0,500);
+      case"lights":return 30+(int(r.moves,999)<=15?15:0);
+      case"react":return 25+(int(r.avg,9999)<300?10:0);
+    }return 0}
+
+  /* ---------- dates and daily challenge ---------- */
+  const dateKey=(d=new Date())=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const dayNumber=s=>{const[y,m,d]=s.split("-").map(Number);return Math.floor(Date.UTC(y,m-1,d)/864e5)};
+  const DAILY=[
+    {g:"logic",lv:1,key:"logic-1",min:70,k:"d_logic"},{g:"mem",key:"mem-easy",max:12,k:"d_mem"},
+    {g:"echo",key:"echo",min:5,k:"d_echo"},{g:"slide",key:"slide-3",max:45,k:"d_slide"},
+    {g:"math",key:"math",min:12,k:"d_math"},{g:"lights",key:"lights",max:25,k:"d_lights"},
+    {g:"react",key:"react",max:400,k:"d_react"}];
+  const dailyFor=ds=>({...DAILY[((dayNumber(ds)%7)+7)%7],date:ds});
+  const dailyMet=(d,r)=>r.g===d.g&&r.key===d.key&&(d.min!=null?r.score>=d.min:r.score<=d.max);
+  const streakNow=(p,today)=>DATE_RE.test(p.dstreak.last)&&dayNumber(today)-dayNumber(p.dstreak.last)<=1?p.dstreak.count:0;
+
+  /* ---------- achievements (explicit unlock conditions) ---------- */
+  const ACH=[
+    {id:"first",ic:"🌟",test:p=>p.runs>=1},
+    {id:"perfect",ic:"🎯",test:(p,c)=>!!c&&c.g==="logic"&&c.ok===10},
+    {id:"master",ic:"👁️",test:p=>p.best["logic-3"]>=70},
+    {id:"sharp",ic:"🃏",test:p=>p.best["mem-hard"]<=14},
+    {id:"echo8",ic:"🎵",test:p=>p.best["echo"]>=8},
+    {id:"slide4",ic:"🧩",test:p=>p.best["slide-4"]!==undefined},
+    {id:"math20",ic:"➕",test:p=>p.best["math"]>=20},
+    {id:"lights20",ic:"💡",test:p=>p.best["lights"]<=20},
+    {id:"react300",ic:"⚡",test:p=>p.best["react"]<=300},
+    {id:"mirror",ic:"🧬",test:p=>p.plays.mb>=1},
+    {id:"allround",ic:"🎮",test:p=>GAMES.every(g=>p.plays[g]>=1)},
+    {id:"daily3",ic:"📅",test:p=>p.dstreak.best>=3},
+    {id:"lvl5",ic:"🚀",test:p=>levelInfo(p.xp).level>=5},
+    {id:"dedicated",ic:"🏅",test:p=>p.runs>=25}];
+
+  /* ---------- profile: shape, validation, migration ---------- */
+  const blank=()=>({v:2,xp:0,runs:0,plays:Object.fromEntries(GAMES.map(g=>[g,0])),best:{},ach:{},hist:[],
+    daily:{date:"",done:false},dstreak:{last:"",count:0,best:0},mbDay:"",mb:{type:"",date:""},
+    logic:{asked:0,solved:0,bestStreak:0},rids:[],migrated:false});
+  function validate(raw){
+    const p=blank();if(!raw||typeof raw!=="object")return p;
+    p.xp=int(raw.xp);p.runs=int(raw.runs);
+    GAMES.forEach(g=>{p.plays[g]=int(raw.plays&&raw.plays[g])});
+    Object.entries(raw.best&&typeof raw.best==="object"?raw.best:{}).forEach(([k,v])=>{const n=num(v);if(BESTKEYS.includes(k)&&n!==null)p.best[k]=n});
+    ACH.forEach(a=>{const v=Number(raw.ach&&raw.ach[a.id]);if(Number.isFinite(v)&&v>0)p.ach[a.id]=v});
+    if(Array.isArray(raw.hist))p.hist=raw.hist.filter(e=>e&&typeof e==="object"&&GAMES.includes(e.g)).slice(0,MAXHIST)
+      .map(e=>({t:int(e.t,0,8.64e15),g:e.g,k:String(e.k==null?"":e.k).slice(0,12),s:int(e.s),u:UNITS.includes(e.u)?e.u:"",x:int(e.x)}));
+    if(raw.daily&&DATE_RE.test(raw.daily.date))p.daily={date:raw.daily.date,done:raw.daily.done===true};
+    if(raw.dstreak){const s=raw.dstreak;p.dstreak={last:DATE_RE.test(s.last)?s.last:"",count:int(s.count,0,1e5),best:int(s.best,0,1e5)};p.dstreak.best=Math.max(p.dstreak.best,p.dstreak.count)}
+    if(DATE_RE.test(raw.mbDay))p.mbDay=raw.mbDay;
+    if(raw.mb&&TYPE_RE.test(raw.mb.type))p.mb={type:raw.mb.type,date:DATE_RE.test(raw.mb.date)?raw.mb.date:""};
+    if(raw.logic)p.logic={asked:int(raw.logic.asked),solved:Math.min(int(raw.logic.solved),int(raw.logic.asked)),bestStreak:int(raw.logic.bestStreak,0,100)};
+    if(Array.isArray(raw.rids))p.rids=raw.rids.filter(x=>typeof x==="string"&&x.length<40).slice(-30);
+    p.migrated=raw.migrated===true;
+    return p}
+  function migrate(old){ /* old = {g,best,stats,mb} read from the pre-profile storage keys */
+    const p=blank(),g=(old&&old.g)||{},b=(old&&old.best)||{},s=(old&&old.stats)||{},m=(old&&old.mb)||{};
+    ["mem-easy","mem-hard","echo","slide-3","slide-4","math","lights","react"].forEach(k=>{const v=num(g[k]);if(v!==null)p.best[k]=v});
+    for(let i=0;i<4;i++){const v=num(b[i]);if(v!==null&&v<=100)p.best["logic-"+i]=v}
+    p.logic={asked:int(s.asked),solved:Math.min(int(s.solved),int(s.asked)),bestStreak:int(s.bestStreak,0,100)};
+    Object.keys(p.best).forEach(k=>{const gm=k.startsWith("logic")?"logic":k.split("-")[0];p.plays[gm]=Math.max(p.plays[gm],1)});
+    p.plays.logic=Math.max(p.plays.logic,int(s.runs,0,1e6));
+    if(TYPE_RE.test(m.type)){p.mb={type:m.type,date:DATE_RE.test(m.date)?m.date:""};p.plays.mb=1}
+    p.runs=GAMES.reduce((a,x)=>a+p.plays[x],0);p.migrated=p.runs>0;
+    if(p.migrated)ACH.forEach(a=>{if(a.id!=="perfect"&&a.id!=="daily3"&&a.test(p,null))p.ach[a.id]=1});
+    return p}
+
+  /* ---------- applying one finished run (idempotent per run id) ---------- */
+  function applyRun(prev,r,today,ts){
+    const p=validate(prev);
+    if(!r||!GAMES.includes(r.g)||typeof r.id!=="string"||!r.id||num(r.score)===null)return{p,s:{rejected:true,xp:0,ach:[]}};
+    if(p.rids.includes(r.id))return{p,s:{dup:true,xp:0,ach:[]}};
+    const lvBefore=levelInfo(p.xp).level,score=num(r.score),d=r.d||{};
+    let xp=xpFor(r.g,d);
+    if(r.g==="mb"){if(p.mbDay===today)xp=0;else p.mbDay=today;if(TYPE_RE.test(d.type))p.mb={type:d.type,date:today}}
+    let newBest=false;
+    if(BESTKEYS.includes(r.key)){const o=p.best[r.key],had=o!==undefined,better=!had||(r.min?score<o:score>o);if(better){p.best[r.key]=score;newBest=had}}
+    p.plays[r.g]++;p.runs++;
+    if(r.g==="logic"){p.logic.asked+=int(d.asked,0,100);p.logic.solved+=int(d.ok,0,100);p.logic.bestStreak=Math.max(p.logic.bestStreak,int(d.streak,0,100));p.logic.solved=Math.min(p.logic.solved,p.logic.asked)}
+    const dl=dailyFor(today);let dailyDone=false;
+    if(p.daily.date!==today)p.daily={date:today,done:false};
+    if(!p.daily.done&&dailyMet(dl,{g:r.g,key:r.key,score})){
+      p.daily.done=true;dailyDone=true;xp+=DAILY_BONUS;
+      const consec=DATE_RE.test(p.dstreak.last)&&dayNumber(today)-dayNumber(p.dstreak.last)===1;
+      p.dstreak.count=consec?p.dstreak.count+1:1;p.dstreak.last=today;p.dstreak.best=Math.max(p.dstreak.best,p.dstreak.count)}
+    p.xp=clamp(p.xp+xp,0,1e9);p.rids=[...p.rids,r.id].slice(-30);
+    p.hist=[{t:int(ts,0,8.64e15),g:r.g,k:r.g==="mb"?p.mb.type:String(r.key||"").slice(0,12),s:score,u:UNITS.includes(r.unit)?r.unit:"",x:xp},...p.hist].slice(0,MAXHIST);
+    const ach=[];ACH.forEach(a=>{if(p.ach[a.id]===undefined&&a.test(p,{g:r.g,ok:d.ok})){p.ach[a.id]=int(ts,0,8.64e15)||1;ach.push(a.id)}});
+    const lvAfter=levelInfo(p.xp).level;
+    return{p,s:{xp,newBest,dailyDone,levelUp:lvAfter>lvBefore?lvAfter:0,ach}}}
+
+  /* ---------- pure game generators ---------- */
+  function makeMath(level,rand=Math.random){
+    const ri=(a,b)=>a+Math.floor(rand()*(b-a+1));
+    const op=["+","−","×"][ri(0,level>1?2:1)];let a,b,ans;
+    if(op==="+"){a=ri(2,9*level+5);b=ri(2,9*level+5);ans=a+b}
+    else if(op==="−"){a=ri(5,9*level+10);b=ri(1,a-1);ans=a-b}
+    else{a=ri(2,6+level);b=ri(2,6+level);ans=a*b}
+    const s=new Set([ans]);let g=0;
+    while(s.size<4&&g++<200){const w=ans+ri(1,Math.max(3,Math.round(ans*.2)))*(rand()<.5?-1:1);if(w>=0)s.add(w)}
+    for(let k=1;s.size<4;k++)s.add(ans+k);
+    return{a,op,b,ans,opts:[...s]}}
+  const lightsPress=(g,i,N=5)=>{const r=Math.floor(i/N),c=i%N;[[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{const rr=r+dr,cc=c+dc;if(rr>=0&&rr<N&&cc>=0&&cc<N)g[rr*N+cc]^=1})};
+  function lightsPuzzle(rand=Math.random,N=5){const g=Array(N*N).fill(0);
+    do{g.fill(0);for(let k=0;k<12;k++)lightsPress(g,Math.floor(rand()*N*N),N)}while(g.every(x=>!x));return g}
+  const slideNbs=(i,n)=>{const r=Math.floor(i/n),c=i%n,a=[];if(r>0)a.push(i-n);if(r<n-1)a.push(i+n);if(c>0)a.push(i-1);if(c<n-1)a.push(i+1);return a};
+  const slideSolved=b=>b.every((v,i)=>v===(i+1)%b.length);
+  function slideSolvable(b,n){const f=b.filter(x=>x);let inv=0;for(let i=0;i<f.length;i++)for(let j=i+1;j<f.length;j++)if(f[i]>f[j])inv++;
+    if(n%2===1)return inv%2===0;const rowFromBottom=n-Math.floor(b.indexOf(0)/n);return(rowFromBottom%2===0)===(inv%2===1)}
+  function slideBoard(n,rand=Math.random){const N=n*n;let b;
+    do{b=[...Array(N).keys()].map(i=>(i+1)%N);let blank=N-1,prev=-1;
+      for(let k=0;k<N*30;k++){const c=slideNbs(blank,n).filter(x=>x!==prev),m=c[Math.floor(rand()*c.length)];[b[blank],b[m]]=[b[m],b[blank]];prev=blank;blank=m}}while(slideSolved(b));
+    return b}
+  function reactStats(a){const s=[...a].sort((x,y)=>x-y),m=s.length>>1;
+    return{avg:Math.round(a.reduce((x,y)=>x+y,0)/a.length),best:s[0],median:s.length%2?s[m]:Math.round((s[m-1]+s[m])/2)}}
+
+  return{GAMES,BESTKEYS,UNITS,ACH,DAILY,DAILY_BONUS,levelInfo,xpFor,dateKey,dayNumber,dailyFor,dailyMet,streakNow,blank,validate,migrate,applyRun,
+    makeMath,lightsPuzzle,lightsPress,slideBoard,slideNbs,slideSolved,slideSolvable,reactStats}
+})();
+/*LOGIC-END*/
+
+(()=>{
+"use strict";
+const t=I18N.t;
+/* ===== settings, storage, sound ===== */
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const obj=v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{};
+const set=Object.assign({gfx:"high",sound:true,vol:.5,rm:matchMedia("(prefers-reduced-motion:reduce)").matches},obj(store.get("oracle-set",{})));
+if(!["low","med","high"].includes(set.gfx))set.gfx="high";
+set.vol=Math.min(1,Math.max(0,+set.vol||0));set.sound=set.sound!==false;set.rm=!!set.rm;
+let AC;
+function tone(f,d=.12,type="sine",v=1,t0=0,slide){
+  if(!set.sound)return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+t0;
+    o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.2*v*set.vol,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.05)}catch{}}
+const sfx={click:()=>tone(520,.07,"triangle"),ok:()=>[523,659,784].forEach((f,i)=>tone(f,.18,"sine",1,i*.07)),no:()=>tone(170,.3,"sawtooth",.6,0,90),
+  whoosh:()=>tone(180,.5,"sine",.3,0,900),done:()=>[392,523,659,784].forEach((f,i)=>tone(f,.4,"sine",1,i*.1))};
+
+/* ===== galaxy, camera, particles ===== */
+const cam={rx:0,ry:0,z:0},cur={rx:0,ry:0,z:0},mouse={x:0,y:0},sm={x:0,y:0};
+const PRE={menu:[-8,0,0],iq:[6,-28,-140],mb:[-6,30,-90],res:[14,0,220]};
+let warp=0,W,H,st=[],pt=[],neb=[];
+function go(p,quiet){[cam.rx,cam.ry,cam.z]=PRE[p];if(!set.rm){warp=quiet?.3:1;if(!quiet)sfx.whoosh()}}
+addEventListener("pointermove",e=>{mouse.x=e.clientX/innerWidth*2-1;mouse.y=e.clientY/innerHeight*2-1});
+const cv=$("#fx"),c=cv.getContext("2d");
+function mkNeb(cols){const s=700,o=document.createElement("canvas");o.width=o.height=s;const x=o.getContext("2d");x.globalCompositeOperation="lighter";
+  for(let i=0;i<14;i++){const px=s/2+(Math.random()-.5)*s*.6,py=s/2+(Math.random()-.5)*s*.6,r=70+Math.random()*170,g=x.createRadialGradient(px,py,0,px,py,r),col=cols[i%cols.length];
+    g.addColorStop(0,`rgba(${col},.22)`);g.addColorStop(1,`rgba(${col},0)`);x.fillStyle=g;x.fillRect(0,0,s,s)}return o}
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+function galaxy(){resize();const n={low:80,med:170,high:300}[set.gfx],cl=["#ffffff","#cfe3ff","#ffe9c7","#d9c7ff"];
+  st=Array.from({length:n},()=>({x:Math.random()*2-1,y:Math.random()*2-1,z:Math.random(),p:Math.random()*6.28,c:cl[Math.floor(Math.random()*4)]}));
+  neb=set.gfx==="low"?[]:[mkNeb(["120,60,255","40,200,210","255,90,170"]),mkNeb(["90,70,255","255,170,90","60,160,255"])]}
+const proj=(s,z)=>{const k=W*.1;return[W/2+s.x/z*k-sm.x*14*(1-z)-cur.ry*(1-z)*.6,H/2+s.y/z*k-sm.y*14*(1-z)]};
+function burst(el,col){if(set.rm||!el||pt.length>260)return;const r=el.getBoundingClientRect(),n={low:12,med:26,high:44}[set.gfx];
+  for(let i=0;i<n;i++){const a=Math.random()*6.28,v=2+Math.random()*5;pt.push({x:r.left+r.width/2,y:r.top+r.height/2,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2,l:1,c:col})}}
+const objs=[...document.querySelectorAll(".o[data-b]")].map(e=>({e,b:e.dataset.b.split(",").map(Number),d:+e.dataset.d}));
+let frame=0;
+function tick(t){if(document.hidden){requestAnimationFrame(tick);return}if(set.gfx==="low"&&(frame++&1)){requestAnimationFrame(tick);return}
+  const mx=set.rm?0:mouse.x,my=set.rm?0:mouse.y;
+  sm.x+=(mx-sm.x)*.07;sm.y+=(my-sm.y)*.07;
+  for(const k in cam)cur[k]+=((set.rm?0:cam[k])-cur[k])*.05;
+  $("#world").style.transform=`translateZ(${cur.z}px) rotateX(${cur.rx-sm.y*6+Math.sin(t/3000)*2}deg) rotateY(${cur.ry+sm.x*8}deg)`;
+  for(const{e,b,d}of objs)e.style.transform=`translate3d(${b[0]+sm.x*d*60}px,${b[1]+sm.y*d*40}px,${b[2]}px) rotateX(${sm.y*d*20}deg) rotateY(${sm.x*d*20}deg)`;
+  $("#tilt").style.transform=`rotateY(${sm.x*3}deg) rotateX(${-sm.y*3}deg)`;
+  c.clearRect(0,0,W,H);
+  if(neb.length){c.globalCompositeOperation="lighter";
+    neb.forEach((o,i)=>{if(i&&set.gfx!=="high")return;const s=Math.max(W,H)*(1.5+i*.4);c.save();c.translate(W/2-sm.x*(18+i*10)-cur.ry*1.5,H/2-sm.y*(12+i*8));
+      c.rotate((set.rm?0:t*(i?-.000012:.000009))+cur.ry*.003);c.globalAlpha=.85;c.drawImage(o,-s/2,-s/2,s,s);c.restore()});
+    c.globalCompositeOperation="source-over"}
+  warp*=.95;
+  for(const s of st){const pz=s.z;s.z-=.0012+warp*.03;
+    if(s.z<=.03){s.x=Math.random()*2-1;s.y=Math.random()*2-1;s.z=1;continue}
+    const[X,Y]=proj(s,s.z);if(X<0||X>W||Y<0||Y>H){s.z=1;continue}
+    c.globalAlpha=(1-s.z*.8)*(.7+.3*Math.sin(t/400+s.p));c.strokeStyle=c.fillStyle=s.c;
+    if(warp>.06){const[x0,y0]=proj(s,pz);c.lineWidth=1.4;c.beginPath();c.moveTo(x0,y0);c.lineTo(X,Y);c.stroke()}
+    else{c.beginPath();c.arc(X,Y,(1-s.z)*2+.3,0,6.283);c.fill()}}
+  for(const p of pt){p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.l-=.02;c.globalAlpha=Math.max(p.l,0);c.fillStyle=p.c;c.beginPath();c.arc(p.x,p.y,3,0,6.283);c.fill()}
+  pt=pt.filter(p=>p.l>0);c.globalAlpha=1;requestAnimationFrame(tick)}
+function applySet(){document.body.classList.toggle("rm",set.rm);document.body.dataset.gfx=set.gfx;store.set("oracle-set",set);galaxy();
+  document.querySelectorAll("#gfx button").forEach(b=>b.classList.toggle("sel",b.dataset.g===set.gfx));
+  $("#snd").checked=set.sound;$("#vol").value=set.vol*100;$("#rm").checked=set.rm}
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(resize,150)});
+let lastFocus;
+const openSet=()=>{lastFocus=document.activeElement;$("#set").classList.add("open");const f=$("#gfx button.sel");if(f)f.focus()};
+const closeSet=()=>{$("#set").classList.remove("open");if(lastFocus&&lastFocus.focus)lastFocus.focus()};
+$("#gb").onclick=()=>{sfx.click();openSet()};
+$("#sc").onclick=()=>{sfx.click();closeSet()};
+
+document.querySelectorAll("#gfx button").forEach(b=>b.onclick=()=>{set.gfx=b.dataset.g;applySet();sfx.click()});
+$("#snd").onchange=e=>{set.sound=e.target.checked;applySet();sfx.click()};
+$("#vol").oninput=e=>{set.vol=e.target.value/100;applySet()};$("#vol").onchange=()=>sfx.ok();
+$("#rm").onchange=e=>{set.rm=e.target.checked;applySet()};
+addEventListener("keydown",e=>{
+  const dlgO=$("#dlg").classList.contains("open"),open=dlgO||$("#set").classList.contains("open");
+  if(e.key==="Escape"){if(dlgO)closeDlg();else if(open)closeSet();return}
+  if(open){if(e.key==="Tab"){const f=[...(dlgO?$("#dlg"):$("#set")).querySelectorAll("button,input")],a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}return}
+  if(e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
+  const kb=app.querySelector('[data-kbd="'+e.key+'"]');if(kb){kb.click();return}
+  const n=+e.key;
+  if(n>=1&&n<=6){const o=app.querySelectorAll(".opt:not(:disabled)");if(o[n-1]){o[n-1].click();return}
+    const l=app.querySelectorAll("[data-v]");if(n<=5&&l[n-1])l[n-1].click()}
+  else if(e.key==="h"||e.key==="H"){const h=$("#hb");if(h)h.click()}});
+applySet();requestAnimationFrame(tick);
+
+/* ===== helpers ===== */
+const app=$("#app");let BANK=[],tm=null,dead=false;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function show(h,quick){cleanup();dead=false;const f=$("#flash");
+  if(!quick&&!set.rm){f.classList.remove("on");void f.offsetWidth;f.classList.add("on")}
+  app.classList.toggle("quick",!!quick);app.style.animation="none";void app.offsetWidth;app.style.animation="";app.innerHTML=h;window.scrollTo({top:0});
+  const hd=app.querySelector("h2,.q");if(hd&&!$("#set").classList.contains("open")){hd.tabIndex=-1;hd.focus({preventScroll:true})}}
+const prog=(n,t)=>`<div class="bar"><i style="width:${n/t*100}%"></i></div>`;
+const COL=["#e9e4ff","#5df2d6","#b46bff","#ffc86b"];
+function shp(s,z=72){
+  if(typeof s!=="object")return `<span class="num">${s}</span>`;
+  const[n,rot,f,sc,d,m]=s,r=40*sc,col=COL[f],v=k=>{const a=(-90+rot+360*k/n)*Math.PI/180;return[r*Math.cos(a),r*Math.sin(a)]};let g;
+  g=n<3?`<circle r="${r}"`:`<polygon points="${Array.from({length:n},(_,k)=>v(k).map(x=>x.toFixed(1)).join(",")).join(" ")}"`;
+  g+=` fill="${f?col:"none"}" fill-opacity=".3" stroke="${col}" stroke-width="3" stroke-linejoin="round"/>`;
+  if(m&&n>=3){const[x,y]=v(0);g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#fff"/>`}
+  for(let k=0;k<d;k++)g+=`<circle cx="${(k-(d-1)/2)*9}" cy="0" r="3.2" fill="#fff"/>`;
+  return `<svg viewBox="-50 -50 100 100" width="${z}" height="${z}" style="color:${col}">${g}</svg>`}
+
+
+/* ===================== i18n runtime ===================== */
+const LANGS=["ar","en","fr"];
+let RR=null; /* re-render callback for the current "static" screen */
+function applyLang(){
+  document.title=t("title");
+  document.querySelectorAll("[data-i]").forEach(e=>{e.textContent=t(e.dataset.i)});
+  document.querySelectorAll("[data-ia]").forEach(e=>e.setAttribute("aria-label",t(e.dataset.ia)));
+  document.querySelectorAll("[data-l]").forEach(b=>b.classList.toggle("sel",b.dataset.l===I18N.lang));
+  if(RR)RR();
+}
+function setLang(l){I18N.set(l);store.set("oracle-lang",l);applyLang()}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-l]");if(b){sfx.click();setLang(b.dataset.l)}});
+
+/* ===================== shared helpers ===================== */
+const now=()=>performance.now();
+const LEAVE=[],TMO=new Set();
+function later(fn,ms){const id=setTimeout(()=>{TMO.delete(id);fn()},ms);TMO.add(id);return id}   /* timeouts owned by the current screen */
+function onLeave(fn){LEAVE.push(fn)}                                                              /* cleanup callbacks run when the screen changes */
+function cleanup(){clearInterval(tm);tm=null;TMO.forEach(clearTimeout);TMO.clear();while(LEAVE.length){try{LEAVE.pop()()}catch(e){/* ignore */}}}
+const paused=()=>document.hidden||$("#set").classList.contains("open")||$("#dlg").classList.contains("open");
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lc=()=>I18N.lang==="ar"?"ar-u-nu-latn":I18N.lang;   /* Latin digits keep scores and equations consistent in Arabic */
+const nf=n=>{try{return new Intl.NumberFormat(lc()).format(n)}catch(e){return String(n)}};
+const fdate=ts=>{try{return new Intl.DateTimeFormat(lc(),{dateStyle:"medium",timeStyle:"short"}).format(new Date(ts))}catch(e){return String(new Date(ts).toISOString().slice(0,16))}};
+let RUNSEQ=0;const newRun=()=>Date.now().toString(36)+"-"+(++RUNSEQ);
+let liveT=0;
+function announce(msg){const l=$("#live");l.textContent="";clearTimeout(liveT);liveT=setTimeout(()=>{l.textContent=msg},40)}
+function toast(msg){const d=document.createElement("div");d.className="toast";d.textContent=msg;$("#toasts").appendChild(d);setTimeout(()=>d.remove(),4500)}
+
+/* ----- confirmation dialog ----- */
+let dlgOk=null,dlgFocus=null;
+function confirmDlg(title,msg,okLabel,onOk){dlgOk=onOk;dlgFocus=document.activeElement;
+  $("#dlgt").textContent=title;$("#dlgp").textContent=msg;$("#dyes").textContent=okLabel;$("#dno").textContent=t("dlg_stay");
+  $("#dlg").classList.add("open");$("#dno").focus()}
+function closeDlg(){$("#dlg").classList.remove("open");dlgOk=null;if(dlgFocus&&document.body.contains(dlgFocus)&&dlgFocus.focus)dlgFocus.focus()}
+$("#dno").onclick=()=>{sfx.click();closeDlg()};
+$("#dyes").onclick=()=>{const f=dlgOk;closeDlg();if(f)f()};
+$("#clr").onclick=()=>{sfx.click();confirmDlg(t("dlg_clr_t"),t("dlg_clr_p"),t("dlg_clr_ok"),clearProgress)};
+function clearProgress(){Profile.reset();toast(t("set_clrd"));if(RR)RR()}
+
+/* ----- persistent profile (single versioned record, validated on every load) ----- */
+const Profile=(()=>{
+  let p=null,okStore=true,recovered=false;
+  const rd=k=>{try{return localStorage.getItem(k)}catch(e){okStore=false;return null}};
+  const wr=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){okStore=false;return false}};
+  function save(){wr("oracle-profile",JSON.stringify(p))}
+  function load(){
+    let raw=null;const s=rd("oracle-profile");
+    if(s!==null){try{raw=JSON.parse(s)}catch(e){recovered=true;wr("oracle-profile-bak",s)}}
+    if(raw&&typeof raw==="object"&&raw.v===2)p=OracleLogic.validate(raw);
+    else{p=OracleLogic.migrate({g:store.get("oracle-g",{}),best:store.get("oracle-best",{}),stats:store.get("oracle-stats",{}),mb:store.get("oracle-mb",{})});save()}
+    return p}
+  return{load,get:()=>p||load(),ok:()=>okStore,recovered:()=>recovered,
+    record(run){const r=OracleLogic.applyRun(p||load(),run,OracleLogic.dateKey(),Date.now());if(!r.s.dup&&!r.s.rejected){p=r.p;save()}return r.s},
+    reset(){p=OracleLogic.blank();recovered=false;["oracle-g","oracle-best","oracle-stats","oracle-mb","oracle-lv","oracle-timed","oracle-seen","oracle-profile-bak"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){/* ignore */}});save()}}
+})();
+
+/* ----- rewards and announcements ----- */
+function rewardsHtml(sm){
+  if(!sm||sm.dup||sm.rejected)return"";
+  const L=[`<p class="xp ltr">${t("xp_gain",nf(sm.xp))}</p>`];
+  if(sm.dailyDone)L.push(`<p class="ok-t">${t("daily_bonus",nf(OracleLogic.DAILY_BONUS))}</p>`);
+  if(sm.levelUp)L.push(`<p class="ok-t">${t("lvl_up",nf(sm.levelUp))}</p>`);
+  sm.ach.forEach(id=>L.push(`<p class="ok-t">${t("ach_new",t("ach_"+id))}</p>`));
+  return`<div class="rw">${L.join("")}</div>`}
+function celebrate(sm,msg){
+  if(!sm||sm.dup||sm.rejected){announce(msg);return}
+  const parts=[msg,t("xp_gain",nf(sm.xp))];
+  if(sm.levelUp){const s=t("lvl_up",nf(sm.levelUp));parts.push(s);toast(s)}
+  sm.ach.forEach(id=>{const s=t("ach_new",t("ach_"+id));parts.push(s);toast(s)});
+  announce(parts.join(". "))}
+
+/* ----- shared screen pieces ----- */
+const gameHead=(id,extra)=>`<div class="meta"><span>${t("g_"+id)}</span><span>${extra||""}<button class="exit" id="ex">${t("exit")}</button></span></div>`;
+function exitBtn(){const b=$("#ex");if(b)b.onclick=()=>{sfx.click();confirmDlg(t("dlg_exit_t"),t("dlg_exit_p"),t("dlg_leave"),menu)}}
+function fatal(msg){if(dead)return;dead=true;cleanup();
+  app.innerHTML=`<h2>${t("err_h")}</h2><p class="fb" style="text-align:center">${esc(msg)}</p><button class="cta" id="rl">${t("err_menu")}</button><button class="ghost" id="rr" style="display:block;margin:.8rem auto 0">${t("err_reload")}</button>`;
+  $("#rl").onclick=()=>{dead=false;closeDlg();menu()};$("#rr").onclick=()=>location.reload()}
+function pickRun(lv){ /* prefers puzzles not seen recently */
+  const bank=BANK[lv]||[],seen=obj(store.get("oracle-seen",{})),s=new Set(Array.isArray(seen[lv])?seen[lv]:[]);
+  let pool=bank.map((_,i)=>i).filter(i=>!s.has(i));if(pool.length<10){pool=bank.map((_,i)=>i);s.clear()}
+  const ids=shuffle(pool).slice(0,10);ids.forEach(i=>s.add(i));seen[lv]=[...s];store.set("oracle-seen",seen);return ids.map(i=>bank[i])}
+function finish(o){ /* result card for the quick games; rewards are recorded exactly once per run id */
+  const sm=o.skip?null:Profile.record({id:o.id,g:o.g,key:o.key,score:o.score,min:o.min,unit:o.unit,d:o.d});
+  sfx.done();
+  const box=document.createElement("div");box.className="fb";
+  box.innerHTML=`<div class="big ltr" style="font-size:2.2rem">${esc(t(o.unit,nf(o.score)))}</div><p>${o.msg}</p>${o.extra||""}${sm&&sm.newBest?`<p class="ok-t">${t("newbest")}</p>`:""}${rewardsHtml(sm)}
+    <button class="cta" id="ag">${t("again")}</button><button class="ghost" id="tmn" style="display:block;margin:.8rem auto 0">${t("tomenu")}</button>`;
+  app.appendChild(box);$("#ag").onclick=o.again;$("#tmn").onclick=menu;$("#ag").focus();
+  celebrate(sm,o.msg);burst($("#ag"),"#ffc86b");if(box.scrollIntoView)box.scrollIntoView({block:"nearest"})}
+function picker(id,opts,start){ /* difficulty / size chooser */
+  RR=()=>picker(id,opts,start);go("menu");
+  show(`<h2>${t("g_"+id)}</h2><p class="fb" style="text-align:center">${t("g_"+id+"_d")}</p><div class="menu">${opts.map((o,i)=>`<button data-o="${i}"><span>${o[0]}<small>${o[1]}</small></span></button>`).join("")}</div><button class="ghost" id="bk">${t("back")}</button>`);
+  app.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{sfx.click();start(opts[b.dataset.o][2])});$("#bk").onclick=menu}
+function intro(id,msg,start){
+  RR=()=>intro(id,msg,start);go("menu");
+  show(`<h2>${t("g_"+id)}</h2><p class="fb" style="text-align:center">${msg}</p><button class="cta" id="st">${t("start")}</button><button class="ghost" id="bk">${t("back")}</button>`);
+  $("#st").onclick=()=>{sfx.click();start()};$("#bk").onclick=menu;$("#st").focus()}
+
+/* ===================== welcome, how to play ===================== */
+function welcome(){RR=welcome;go("menu");
+  show(`<h2>${t("wel_h")}</h2><p class="fb" style="text-align:center">${t("wel_p")}</p>
+   <div class="chips"><span>${t("chip1")}</span><span>${t("chip2")}</span><span>${t("chip3")}</span><span>${t("chip4")}</span></div>
+   <button class="cta" id="en">${t("enter")}</button><button class="ghost" id="hw" style="display:block;margin:.8rem auto 0">${t("how")}</button>`);
+  $("#en").onclick=()=>{sfx.click();menu()};$("#hw").onclick=()=>{sfx.click();howTo(welcome)};$("#en").focus()}
+function howTo(back){RR=()=>howTo(back);go("menu");
+  show(`<h2>${t("how")}</h2><div class="rep"><ol>${[1,2,3,4,5,6].map(i=>`<li>${t("ht"+i)}</li>`).join("")}</ol><h3>${t("ht_kb_h")}</h3><p>${t("ht_kb")}</p></div><button class="cta" id="bk">${t("gotit")}</button>`);
+  $("#bk").onclick=()=>{sfx.click();back()};$("#bk").focus()}
+
+/* ===================== progress dashboard ===================== */
+const BEST=[["mem-easy","g_mem","easy","u_moves"],["mem-hard","g_mem","hard","u_moves"],["echo","g_echo",0,"u_rounds"],["slide-3","g_slide","3×3","u_moves"],["slide-4","g_slide","4×4","u_moves"],["math","g_math",0,"u_ok"],["lights","g_lights",0,"u_moves"],["react","g_react",0,"u_ms"]];
+const xpBar=L=>`<div class="player"><div class="meta"><b>${t("lvl",nf(L.level))}</b><span class="ltr">${t("xp_into",nf(L.into),nf(L.need))}</span></div><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${L.pct}" aria-label="${t("lvl",nf(L.level))}"><i style="width:${L.pct}%"></i></div></div>`;
+const dailyText=dl=>t(dl.k,nf(dl.min!=null?dl.min:dl.max),dl.g==="logic"?t("lv"+dl.lv):"");
+function progress(){RR=progress;go("res",true);
+  const p=Profile.get(),L=OracleLogic.levelInfo(p.xp),A=OracleLogic.ACH,today=OracleLogic.dateKey();
+  const stat=(k,v)=>`<div><small>${k}</small><b class="ltr">${v}</b></div>`;
+  const notes=[Profile.ok()?"":t("pr_nostore"),Profile.recovered()?t("pr_recovered"):"",p.migrated?t("pr_migrated"):""].filter(Boolean).map(x=>`<div class="warn">${x}</div>`).join("");
+  const lv=i=>typeof p.best["logic-"+i]==="number"?t("u_pct",p.best["logic-"+i]):t("pr_none");
+  show(`<h2>${t("progress")}</h2>${notes}${xpBar(L)}
+   ${p.runs?"":`<p class="fb" style="text-align:center">${t("pr_empty")}</p>`}
+   <h3>${t("pr_stats")}</h3><div class="sg">${stat(t("pr_runs"),nf(p.runs))}${stat(t("pr_xp_total"),nf(p.xp))}${stat(t("daily_streak"),nf(OracleLogic.streakNow(p,today)))}${stat(t("pr_dbest"),nf(p.dstreak.best))}
+    ${p.logic.asked?stat(t("pr_acc"),Math.round(p.logic.solved/p.logic.asked*100)+"%")+stat(t("pr_streak"),nf(p.logic.bestStreak)):""}</div>
+   <h3>${t("pr_bests")}</h3>${[0,1,2,3].map(i=>`<div class="meta"><span>${t("g_logic")} · ${t("lv"+i)}</span><b>${lv(i)}</b></div>`).join("")}
+   ${BEST.map(r=>`<div class="meta"><span>${t(r[1])}${r[2]?" · "+t(r[2]):""}</span><b>${typeof p.best[r[0]]==="number"?esc(t(r[3],nf(p.best[r[0]]))):t("pr_none")}</b></div>`).join("")}
+   <div class="meta"><span>${t("g_mb")}</span><b class="ltr">${p.mb.type?esc(p.mb.type):t("pr_none")}</b></div>
+   <h3>${t("pr_ach",nf(Object.keys(p.ach).length),nf(A.length))}</h3>
+   <ul class="alist">${A.map(a=>`<li class="${p.ach[a.id]?"on":""}"><span aria-hidden="true">${a.ic}</span><div><b>${t("ach_"+a.id)}</b><small>${t("achd_"+a.id)}</small></div><em>${p.ach[a.id]?"✓":t("pr_locked")}</em></li>`).join("")}</ul>
+   <h3>${t("pr_hist")}</h3>${p.hist.length?`<ul class="hlist">${p.hist.map(h=>`<li><span>${esc(fdate(h.t))}</span><span>${t("g_"+h.g)} · <b class="ltr">${h.g==="mb"?esc(h.k):esc(t(h.u,nf(h.s)))}</b></span><em class="ltr">+${nf(h.x)} XP</em></li>`).join("")}</ul>`:`<p class="note">${t("pr_hist_empty")}</p>`}
+   <details><summary>${t("pr_xp_how")}</summary><ul>${["logic","mb","mem","echo","slide","math","lights","react","daily"].map(k=>`<li>${t("xr_"+k)}</li>`).join("")}</ul></details>
+   <p class="note">${t("pr_note")}</p><button class="cta" id="bk">${t("back")}</button>`);
+  $("#bk").onclick=menu}
+
+/* ===================== hub menu ===================== */
+const GAMES=[["logic","🔷"],["mb","🧬"],["mem","🃏"],["echo","🎵"],["slide","🧩"],["math","➕"],["lights","💡"],["react","⚡"]];
+const START={logic:()=>iqSetup(menu),mb:()=>mbIntro(menu),
+  mem:()=>picker("mem",[[t("easy"),"4×3",6],[t("hard"),"4×4",8]],memPlay),
+  echo:()=>intro("echo",t("g_echo_d"),echoPlay),
+  slide:()=>picker("slide",[["3×3","8",3],["4×4","15",4]],slidePlay),
+  math:()=>intro("math",t("math_intro",45),mathPlay),lights:()=>lightsPlay(),
+  react:()=>intro("react",t("react_intro"),reactPlay)};
+function startDaily(){const dl=OracleLogic.dailyFor(OracleLogic.dateKey());
+  if(dl.g==="logic"){store.set("oracle-lv",dl.lv);iqSetup(menu)}else if(dl.g==="mem")memPlay(6);else if(dl.g==="slide")slidePlay(3);else START[dl.g]()}
+function bestLine(id,p){let v="";
+  if(id==="logic"){const b=[0,1,2,3].map(i=>p.best["logic-"+i]).filter(x=>typeof x==="number");if(b.length)v=t("u_pct",Math.max(...b))}
+  else if(id==="mb"){v=p.mb.type}
+  else v=BEST.filter(r=>r[1]==="g_"+id&&typeof p.best[r[0]]==="number").map(r=>t(r[3],nf(p.best[r[0]]))).join(" · ");
+  return v?`<em class="ltr">🏆 ${esc(v)}</em>`:""}
+function menu(){RR=menu;go("menu");
+  const p=Profile.get(),L=OracleLogic.levelInfo(p.xp),today=OracleLogic.dateKey(),dl=OracleLogic.dailyFor(today),done=p.daily.date===today&&p.daily.done,sn=OracleLogic.streakNow(p,today);
+  show(`${xpBar(L)}
+   <div class="daily"><div><b>📅 ${t("daily_h")}</b><small>${dailyText(dl)}</small>${sn?`<small>🔥 ${t("daily_streak")}: <span class="ltr">${nf(sn)}</span></small>`:""}</div>${done?`<span class="ok-t">${t("daily_done",nf(OracleLogic.DAILY_BONUS))}</span>`:`<button id="dg">${t("daily_go")}</button>`}</div>
+   ${Profile.ok()?"":`<div class="warn">${t("pr_nostore")}</div>`}
+   <h2>${t("menu_h")}</h2><div class="gm">${GAMES.map(([id,ic])=>`<button data-g="${id}"><span class="ic" aria-hidden="true">${ic}</span><b>${t("g_"+id)}</b><small>${t("g_"+id+"_d")}</small>${bestLine(id,p)}</button>`).join("")}</div>
+   <div class="row2"><button id="hw">📖 ${t("how")}</button><button id="pg">📊 ${t("progress")}</button></div><p class="note">${t("menu_note")}</p>`);
+  app.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{sfx.click();START[b.dataset.g]()});
+  const dg=$("#dg");if(dg)dg.onclick=()=>{sfx.click();startDaily()};
+  $("#hw").onclick=()=>{sfx.click();howTo(menu)};$("#pg").onclick=()=>{sfx.click();progress()}}
+
+/* ===================== game 1: shape logic ===================== */
+const LVL=[{c:"#5df2d6",t:45,m:1,i:"🌱"},{c:"#b46bff",t:60,m:1.5,i:"⚡"},{c:"#ffc86b",t:75,m:2,i:"🔥"},{c:"#ff6b9d",t:90,m:3,i:"👁️"}];
+function tx(w){const[k,...a]=w; /* localise an explanation descriptor from the puzzle engine */
+  if(k==="rules")return t("rules",a[0].map(r=>t(r[0],...r.slice(1))).join("; "));
+  if(k==="h_focus")return t(k,a[0].map(x=>t("a_"+x)).join(t("and")));
+  return t(k,...a)}
+function iqSetup(done){
+  RR=()=>iqSetup(done);go("iq");
+  let lv=Math.min(3,Math.max(0,Math.floor(+store.get("oracle-lv",0))||0));const best=[0,1,2,3].map(i=>Profile.get().best["logic-"+i]),timed=store.get("oracle-timed",false)===true;
+  show(`<h2>${t("lg_h")}</h2><div class="menu" id="lv">${LVL.map((l,i)=>`<button data-i="${i}" style="--c:${l.c}" class="${i===lv?"sel":""}"><span class="ic">${l.i}</span><span>${t("lv"+i)}<small>${t("lvd"+i)}${typeof best[i]==="number"?t("lg_best",best[i]):""}</small></span></button>`).join("")}</div>
+   <label class="chk"><input type="checkbox" id="tt" ${timed?"checked":""}> <span>${t("lg_timed",LVL.map(l=>l.t).join(" / "))}</span></label>
+   <button class="cta" id="st">${t("lg_begin")}</button><button class="ghost" id="bk">${t("back")}</button>
+   <p class="note">${t("lg_note",BANK.reduce((a,b)=>a+b.length,0))}</p>`);
+  app.querySelectorAll("#lv button").forEach(b=>b.onclick=()=>{sfx.click();lv=+b.dataset.i;app.querySelectorAll("#lv button").forEach(x=>x.classList.toggle("sel",x===b))});
+  $("#bk").onclick=done;
+  $("#st").onclick=()=>{const tmd=$("#tt").checked;store.set("oracle-lv",lv);store.set("oracle-timed",tmd);sfx.click();iqRun(lv,tmd,done)}}
+function iqRun(lv,timed,done){
+  RR=null;const runId=newRun();
+  const L=LVL[lv],qs=pickRun(lv);if(!qs.length)return fatal(t("err_nop"));
+  let i=0,pts=0,ok=0,streak=0,bestS=0,hints=0,spent=0;const miss=[];
+  function ask(){
+    const q=qs[i],opts=shuffle([q.ans,...q.w]),same=o=>JSON.stringify(o)===JSON.stringify(q.ans);let t0=now(),last=t0,act=0,over=false,hint=false;
+    go("iq",true);
+    const cells=q.seq.map(x=>`<div class="cell">${shp(x,q.mx?54:72)}</div>`).join("")+`<div class="cell qm">?</div>`;
+    show(`${prog(i,qs.length)}<div class="meta"><span>${t("lv"+lv)} · ${i+1}/${qs.length}</span><span>⭐ ${pts}${streak>1?" · 🔥 "+streak:""}<button class="exit" id="ex">${t("exit")}</button></span></div>
+     ${timed?`<div class="tb"><i id="tbi"></i></div>`:""}<p class="q">${t("lg_q")}</p>
+     <div class="${q.mx?"mx":"seq"}" role="img" aria-label="${t("lg_pat")}">${cells}</div>
+     <div class="grid">${opts.map((o,k)=>`<button class="opt" data-k="${k}" aria-label="${t("lg_opt",k+1)}">${shp(o,q.mx?54:68)}</button>`).join("")}</div>
+     <div id="fb"><button id="hb" class="hint-b">${t("lg_hint")}</button></div>`,true);
+    exitBtn();
+    const bs=[...app.querySelectorAll(".opt")];
+    function fin(b){
+      if(over)return;over=true;clearInterval(tm);const dt=act/1000;spent+=dt;const good=!!b&&same(opts[b.dataset.k]);let gain=0;
+      bs.forEach((x,k)=>{x.disabled=true;if(same(opts[k]))x.classList.add("ok")});
+      if(good){streak++;bestS=Math.max(bestS,streak);ok++;gain=Math.round(((hint?5:10)+Math.min(Math.max(streak-2,0),5)*2+(timed?Math.round(5*Math.max(0,1-dt/L.t)):0))*L.m);pts+=gain;sfx.ok();burst(b,L.c)}
+      else{streak=0;miss.push([i+1,q.why]);sfx.no();if(b)b.classList.add("no")}
+      $("#fb").innerHTML=`<div class="fb"><b class="${good?"ok-t":"no-t"}">${good?t("lg_ok",gain):b?t("lg_no"):t("lg_to")}</b><p>${tx(q.why)}</p></div><button class="cta" id="nx">${i+1<qs.length?t("lg_next"):t("lg_see")}</button>`;
+      $("#nx").focus();announce($("#fb").textContent);$("#nx").onclick=()=>{sfx.click();i++;i<qs.length?ask():result()}}
+    bs.forEach(b=>b.onclick=()=>{if(now()-t0<350)return;fin(b)});
+    $("#hb").onclick=()=>{if(over)return;hint=true;hints++;sfx.click();$("#fb").innerHTML=`<p class="fb">💡 ${tx(q.hint)}</p>`};
+    const tbi=timed?$("#tbi"):null;tm=setInterval(()=>{const n=now(),dt=n-last;last=n;if(paused())return;act+=dt; /* active time only: pauses with dialogs and hidden tabs */
+      if(timed){const f=1-act/(L.t*1000);tbi.style.width=Math.max(f,0)*100+"%";if(f<.25)tbi.style.background="var(--blood)";if(f<=0)fin(null)}},100)}
+  function result(){
+    const pct=Math.round(ok/qs.length*100),sm=Profile.record({id:runId,g:"logic",key:"logic-"+lv,score:pct,min:false,unit:"u_pct",d:{lv,ok,asked:qs.length,streak:bestS}});
+    const msg=pct>=85?t(lv<3?"lg_m1":"lg_m2"):pct>=60?t("lg_m3"):t("lg_m4");
+    go("res");sfx.done();
+    show(`${prog(1,1)}<h2>${t("lg_res",t("lv"+lv))}</h2><div class="big">${ok}/${qs.length}</div>
+     <div class="stats"><span>${t("lg_acc")} <b>${pct}%</b></span><span>${t("lg_pts")} <b>${nf(pts)}</b></span><span>${t("lg_bs")} <b>${bestS}</b></span><span>${t("lg_hints")} <b>${hints}</b></span><span>${t("lg_avg")} <b>${(spent/qs.length).toFixed(1)}s</b></span></div>
+     <p class="fb">${msg}</p>${rewardsHtml(sm)}
+     ${miss.length?`<details><summary>${t("lg_rev",miss.length)}</summary><ul>${miss.map(m=>`<li>${t("lg_pz",m[0],tx(m[1]))}</li>`).join("")}</ul></details>`:""}
+     <details><summary>${t("lg_calc_s")}</summary><p>${t("lg_calc")}</p></details>
+     <button class="cta" id="nx">${t("tomenu")}</button><p class="note">${t("lg_disc")}</p>`);
+    celebrate(sm,t("lg_res",t("lv"+lv))+" "+ok+"/"+qs.length);if(pct>=60)burst($(".big"),"#ffc86b");$("#nx").onclick=done}
+  ask()}
+
+/* ===================== game 2: personality reflection ===================== */
+const PQP=["E","I","E","I","E","I","S","N","S","N","S","N","T","F","T","F","T","F","J","P","J","P","J","P"];
+const PAIRS=["EI","SN","TF","JP"],P8=["E","I","S","N","T","F","J","P"];
+function mbIntro(done){
+  RR=()=>mbIntro(done);go("mb");
+  show(`<h2>${t("g_mb")}</h2><p class="fb">${t("mb_intro")}</p><div class="warn">${t("mb_warn")}</div>
+   <button class="cta" id="gb2">${t("mb_begin")}</button><button class="ghost" id="bk">${t("back")}</button>`);
+  $("#bk").onclick=done;$("#gb2").onclick=()=>{sfx.click();mbRun(done)}}
+function mbRun(done){
+  RR=null;const runId=newRun(),QT=I18N.raw("Q"),LK=I18N.raw("LK"),qs=shuffle(PQP.map((_,k)=>k)),ans={};let i=0;
+  function ask(){
+    const id=qs[i];go(i%2?"iq":"mb",true);
+    show(`${prog(i,qs.length)}<div class="meta"><span>${t("mb_stmt",i+1,qs.length)}</span><span><button class="exit" id="ex">${t("exit")}</button></span></div>
+     <p class="q" style="margin-top:2rem">${QT[id]}</p>
+     <div class="lk">${LK.map((lb,k)=>`<button data-v="${k-2}" class="${ans[id]===k-2?"sel":""}">${lb}</button>`).join("")}</div>
+     ${i?`<button class="ghost" id="pb">${t("prev")}</button>`:""}`,true);
+    exitBtn();
+    const born=now();let lock=false;
+    app.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{if(lock||now()-born<300)return;lock=true;ans[id]=+b.dataset.v;sfx.click();b.classList.add("sel");
+      later(()=>{i++;i<qs.length?ask():result()},180)});
+    if(i)$("#pb").onclick=()=>{i--;ask()}}
+  function result(){
+    const QT2=I18N.raw("Q"),LD=I18N.raw("L"),DESC=I18N.raw("D");
+    const R=PAIRS.map(p=>{const items=PQP.map((pole,k)=>({k,tx:QT2[k],pole,v:ans[k]??0})).filter(x=>p.includes(x.pole));
+      const score=items.reduce((a,x)=>a+x.v*(x.pole===p[0]?1:-1),0),letter=score>=0?p[0]:p[1],d=Math.abs(score);
+      const con=items.map(x=>({...x,c:x.v*(x.pole===letter?1:-1)}));
+      return{p,score,letter,d,pa:Math.round((score+12)/24*100),lab:t("c"+(d<=2?0:d<=5?1:d<=8?2:3)),
+        pro:con.filter(x=>x.c>0).sort((a,b)=>b.c-a.c).slice(0,2),con:con.filter(x=>x.c<0).sort((a,b)=>a.c-b.c).slice(0,1)}});
+    const type=R.map(x=>x.letter).join(""),clear=R.filter(x=>x.d>5).length;
+    const pct=l=>{const x=R.find(r=>r.p.includes(l));return l===x.p[0]?x.pa:100-x.pa};
+    const pos=(i2,rr)=>{const a=(-90+45*i2)*Math.PI/180;return[150+rr*Math.cos(a),150+rr*Math.sin(a)]};
+    const poly=k=>P8.map((_,i2)=>pos(i2,k).map(x=>x.toFixed(1)).join(",")).join(" ");
+    const radar=`<svg class="radar ltr" viewBox="0 0 300 300" role="img" aria-label="${t("rp_radar")}" style="width:100%;max-width:340px;display:block;margin:1rem auto">
+      ${[25,50,75,100].map(k=>`<polygon points="${poly(k)}" fill="none" stroke="rgba(180,107,255,.3)"/>`).join("")}
+      ${P8.map((l,i2)=>{const[x,y]=pos(i2,100),[tx2,ty]=pos(i2,124);return `<line x1="150" y1="150" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(180,107,255,.25)"/><text x="${tx2.toFixed(1)}" y="${(ty+5).toFixed(1)}" text-anchor="middle">${l}</text>`}).join("")}
+      <polygon id="rp" points="${P8.map((l,i2)=>pos(i2,pct(l)).map(x=>x.toFixed(1)).join(",")).join(" ")}" fill="rgba(93,242,214,.25)" stroke="#5df2d6" stroke-width="2.5" style="transform-origin:150px 150px;transform:scale(0);transition:transform 1.3s cubic-bezier(.2,.9,.2,1)"/>
+      ${P8.map((l,i2)=>{const[x,y]=pos(i2,pct(l));return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#ffc86b"/>`}).join("")}</svg>`;
+    const axes=R.map(x=>`<div class="ax ltr"><span>${x.p[0]}</span><div><i style="width:0" data-w="${x.pa}"></i><i style="width:0" data-w="${100-x.pa}"></i></div><span>${x.p[1]}</span></div>
+      <div class="stats" style="font-size:.85rem"><span>${x.pa}% ${x.p[0]}</span><b>${x.lab} · ${x.letter}</b><span>${100-x.pa}% ${x.p[1]}</span></div>
+      <details><summary>${t("rp_infl")}</summary><ul>${x.pro.map(a=>`<li>${t("rp_push",a.tx,LK[a.v+2],x.letter)}</li>`).join("")||`<li>${t("rp_none")}</li>`}
+      ${x.con.map(a=>`<li>${t("rp_pull",a.tx,LK[a.v+2])}</li>`).join("")}</ul></details>`).join("");
+    const Ls=R.map(x=>LD[x.letter]);
+    const rep=`<div class="rep"><h3>${t("rp_ov")}</h3><details><summary>${t("rp_how")}</summary><p>${t("rp_howt")}</p></details><p><b class="ltr">${type}</b>: ${DESC[type]}</p>
+      <p>${t("rp_conf",clear,t(clear===4?"rp_c4":clear>=2?"rp_c2":"rp_c0"))}</p>
+      ${R.map((x,i2)=>`<h3>${Ls[i2][0]} (${x.letter}) · ${x.lab}</h3><p>${Ls[i2][1]}${x.d<=5?t("rp_mid",x.pa,100-x.pa,LD[x.p.replace(x.letter,"")][0]):""}</p>`).join("")}
+      <h3>${t("rp_str")}</h3><ul>${Ls.map(l=>`<li>${l[2]}</li>`).join("")}</ul>
+      <h3>${t("rp_bl")}</h3><ul>${Ls.map(l=>`<li>${l[3]}</li>`).join("")}</ul>
+      <h3>${t("rp_gr")}</h3><ul>${Ls.map(l=>`<li>${l[4]}</li>`).join("")}</ul></div>`;
+    const sm=Profile.record({id:runId,g:"mb",key:"",score:0,min:false,unit:"",d:{type}});
+    go("res");sfx.done();
+    show(`${prog(1,1)}<h2>${t("rp_h")}</h2><div class="big">${type}</div><p class="fb" style="text-align:center">${DESC[type]}</p>
+     ${radar}<h3>${t("rp_dims")}</h3>${axes}${rep}
+     ${rewardsHtml(sm)}<div class="warn">${t("rp_warn")}</div><button class="cta" id="nx">${t("tomenu")}</button>`);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{const rp=$("#rp");if(rp)rp.style.transform="scale(1)";app.querySelectorAll("[data-w]").forEach(e=>e.style.width=e.dataset.w+"%")}));
+    celebrate(sm,t("rp_h")+" "+type);burst($(".big"),"#b46bff");$("#nx").onclick=done}
+  ask()}
+
+/* ===================== game 3: memory match ===================== */
+function memPlay(n){
+  RR=null;go("mb",true);const id=newRun();
+  const key=n===6?"mem-easy":"mem-hard",syms=shuffle(["🌙","⭐","🔮","🪐","☄️","🌌","🧿","🦉"]).slice(0,n),cards=shuffle([...syms,...syms]);
+  let moves=0,found=0,open=[],lock=false;
+  show(`${gameHead("mem",`<span id="mv" class="ltr">${t("moves")}: 0</span>`)}<p class="hintline">${t("gi_mem")}</p><div class="mem">${cards.map((s,i)=>`<button class="mc" data-i="${i}" aria-label="${t("card",i+1)}"><i class="bk">❔</i><i class="fr">${s}</i></button>`).join("")}</div>`,true);
+  exitBtn();const bs=[...app.querySelectorAll(".mc")];
+  bs.forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;if(lock||b.classList.contains("up"))return;
+    b.classList.add("up");b.setAttribute("aria-label",cards[i]);sfx.click();open.push(i);
+    if(open.length<2)return;
+    moves++;$("#mv").textContent=t("moves")+": "+moves;const[a,c]=open;open=[];
+    if(cards[a]===cards[c]){[a,c].forEach(k=>bs[k].classList.add("ok"));sfx.ok();burst(bs[c],"#5df2d6");announce(t("ann_pair"));
+      if(++found===n)finish({id,g:"mem",key,score:moves,min:true,unit:"u_moves",d:{moves,pairs:n},msg:t("mem_done",nf(moves)),again:()=>memPlay(n)})}
+    else{lock=true;sfx.no();later(()=>{[a,c].forEach(k=>{bs[k].classList.remove("up");bs[k].setAttribute("aria-label",t("card",k+1))});lock=false},800)}})}
+
+/* ===================== game 4: pattern echo ===================== */
+function echoPlay(){
+  RR=null;go("mb",true);const id=newRun();
+  const cols=["#5df2d6","#b46bff","#ffc86b","#ff6b9d"],fr=[262,330,392,523],seq=[];let pos=0,accept=false,ended=false;
+  show(`${gameHead("echo",`<span id="rd" class="ltr"></span>`)}<p class="hintline">${t("gi_echo")}</p><p class="q" id="stt" role="status"></p><div class="pads">${cols.map((c,i)=>`<button class="pad" data-kbd="${i+1}" aria-label="${i+1}" style="--p:${c}"></button>`).join("")}</div>`,true);
+  exitBtn();
+  const pads=[...app.querySelectorAll(".pad")],wait=ms=>new Promise(r=>later(r,ms)),say=s=>{$("#stt").textContent=s};
+  const flash=i=>{pads[i].classList.add("lit");tone(fr[i],.3,"sine",1.2);later(()=>pads[i].classList.remove("lit"),320)};
+  const round=async()=>{
+    accept=false;seq.push(Math.floor(Math.random()*4));$("#rd").textContent=t("echo_round",seq.length);say(t("echo_watch"));await wait(700);
+    for(const i of seq){flash(i);await wait(600)}
+    accept=true;pos=0;say(t("echo_you"))};
+  pads.forEach((p,i)=>p.onclick=()=>{
+    if(!accept||ended)return;flash(i);
+    if(i!==seq[pos]){accept=false;ended=true;sfx.no();const d=seq.length-1;say("");
+      finish({id,g:"echo",key:"echo",score:d,min:false,unit:"u_rounds",d:{rounds:d},msg:t("echo_over",nf(d)),again:echoPlay,skip:d<1});return}
+    if(++pos===seq.length){accept=false;sfx.ok();later(round,800)}});
+  round()}
+
+/* ===================== game 5: sliding tiles ===================== */
+function slidePlay(n){
+  RR=null;go("mb",true);const id=newRun();
+  const key="slide-"+n,b=OracleLogic.slideBoard(n);let blank=b.indexOf(0),moves=0,done=false;
+  show(`${gameHead("slide",`<span id="mv" class="ltr"></span>`)}<p class="hintline">${t("gi_slide")}</p><div class="tiles" id="tl" style="grid-template-columns:repeat(${n},1fr)"></div><button class="ghost" id="sh" style="display:block;margin:0 auto">${t("shuffle")}</button>`,true);
+  exitBtn();
+  const draw=()=>{$("#mv").textContent=t("moves")+": "+moves;
+    $("#tl").innerHTML=b.map((v,i)=>`<button class="tile ltr${v?"":" blank"}" data-i="${i}" ${v?"":'disabled aria-hidden="true"'}>${v||""}</button>`).join("");
+    $("#tl").querySelectorAll(".tile").forEach(x=>x.onclick=()=>move(+x.dataset.i))};
+  const move=i=>{if(done||!OracleLogic.slideNbs(blank,n).includes(i))return;[b[blank],b[i]]=[b[i],b[blank]];blank=i;moves++;sfx.click();draw();
+    if(OracleLogic.slideSolved(b)){done=true;finish({id,g:"slide",key,score:moves,min:true,unit:"u_moves",d:{n,moves},msg:t("slide_win",nf(moves)),again:()=>slidePlay(n)})}};
+  $("#sh").onclick=()=>slidePlay(n);
+  const kh=e=>{if(e.ctrlKey||e.metaKey||e.altKey||paused())return;
+    const m={ArrowUp:blank+n,ArrowDown:blank-n,ArrowLeft:blank+1,ArrowRight:blank-1}[e.key];
+    if(m!==undefined&&OracleLogic.slideNbs(blank,n).includes(m)){e.preventDefault();move(m)}};
+  addEventListener("keydown",kh);onLeave(()=>removeEventListener("keydown",kh));draw()}
+
+/* ===================== game 6: math sprint ===================== */
+function mathPlay(){
+  RR=null;go("iq",true);const id=newRun();
+  const TOTAL=45000;let left=TOTAL,last=now(),ok=0,over=false,ans=0;
+  show(`${gameHead("math",`<span id="mv" class="ltr"></span>`)}<p class="hintline">${t("gi_math")}</p><div class="tb"><i id="tbi"></i></div><p class="big ltr" id="mq" style="font-size:2.4rem"></p><div class="grid" id="mo" style="grid-template-columns:repeat(2,1fr)"></div>`,true);
+  exitBtn();
+  const next=()=>{const q=OracleLogic.makeMath(1+Math.floor(ok/4));ans=q.ans;
+    $("#mq").textContent=`${q.a} ${q.op} ${q.b}`;$("#mv").textContent=t("math_ok",nf(ok));
+    $("#mo").innerHTML=shuffle(q.opts).map(v=>`<button class="opt ltr" data-n="${v}">${v}</button>`).join("");
+    $("#mo").querySelectorAll(".opt").forEach(x=>x.onclick=()=>{if(over)return;if(+x.dataset.n===ans){ok++;sfx.ok()}else{left-=3000;sfx.no()}next()})};
+  const end=()=>{if(over)return;over=true;clearInterval(tm);$("#mo").innerHTML="";$("#mv").textContent=t("math_ok",nf(ok));
+    finish({id,g:"math",key:"math",score:ok,min:false,unit:"u_ok",d:{ok},msg:t("math_done",nf(ok)),again:mathPlay})};
+  next();
+  tm=setInterval(()=>{const n=now(),dt=n-last;last=n;if(paused())return;left-=dt;   /* wall-clock based, so it cannot drift and pauses while dialogs are open */
+    $("#tbi").style.width=Math.max(left/TOTAL,0)*100+"%";if(left<=0)end()},100)}
+
+/* ===================== game 7: lights out ===================== */
+function lightsPlay(){
+  RR=null;go("menu",true);const id=newRun();
+  const N=5,g=OracleLogic.lightsPuzzle();let moves=0,over=false;
+  show(`${gameHead("lights",`<span id="mv" class="ltr"></span>`)}<p class="hintline">${t("lights_goal")}</p><div class="lights" id="lg"></div><button class="ghost" id="nw" style="display:block;margin:0 auto">${t("lights_new")}</button>`,true);
+  exitBtn();
+  const draw=()=>{$("#mv").textContent=t("moves")+": "+moves;
+    $("#lg").innerHTML=g.map((v,i)=>`<button class="lt${v?" on":""}" data-i="${i}" aria-pressed="${!!v}" aria-label="${Math.floor(i/N)+1},${i%N+1}"></button>`).join("");
+    $("#lg").querySelectorAll(".lt").forEach(b=>b.onclick=()=>{if(over)return;OracleLogic.lightsPress(g,+b.dataset.i);moves++;sfx.click();draw();
+      if(g.every(x=>!x)){over=true;finish({id,g:"lights",key:"lights",score:moves,min:true,unit:"u_moves",d:{moves},msg:t("lights_win",nf(moves)),again:lightsPlay})}})};
+  $("#nw").onclick=lightsPlay;draw()}
+
+/* ===================== game 8: reaction test ===================== */
+function reactPlay(){
+  RR=null;go("menu",true);const id=newRun();
+  let round=0,state="idle",t0=0;const res=[];
+  show(`${gameHead("react")}<p class="hintline">${t("react_intro")}</p><p class="q" id="rq">${t("react_round",1)}</p><button class="react" id="rb">${t("react_tap")}</button>`,true);
+  exitBtn();const rb=$("#rb");
+  const setS=(cls,txt)=>{rb.className="react "+cls;rb.textContent=txt};
+  const arm=delay=>{state="wait";setS("wait",t("react_wait"));
+    later(()=>{if(paused()){arm(800);return}state="go";setS("go",t("react_go"));announce(t("react_go"));t0=now()},delay)};   /* never goes green behind a dialog */
+  rb.onclick=()=>{
+    if(state==="idle")arm(1500+Math.random()*2500);
+    else if(state==="wait"){TMO.forEach(clearTimeout);TMO.clear();state="idle";setS("wait",t("react_early"));sfx.no()}
+    else if(state==="go"){const ms=Math.round(now()-t0);res.push(ms);round++;sfx.click();
+      if(round===5){const st=OracleLogic.reactStats(res);state="done";rb.disabled=true;
+        finish({id,g:"react",key:"react",score:st.avg,min:true,unit:"u_ms",d:{avg:st.avg},msg:t("react_done",nf(st.avg)),again:reactPlay,
+          extra:`<p class="ltr">${t("react_list",res.join(" · "))}</p><p class="ltr">${t("react_best",nf(st.best))}</p>`})}
+      else{state="idle";setS("",t("react_ms",nf(ms)));$("#rq").textContent=t("react_round",round+1)}}}}
+
+/* ===================== boot ===================== */
+function boot(){
+  try{Profile.load();BANK=PuzzleEngine.buildBanks(2026);if(BANK.length!==4||BANK.some(b=>b.length<10))throw new Error(t("err_bank"));welcome()}
+  catch(err){fatal(err.message)}}
+(()=>{const saved=store.get("oracle-lang",null),nav=(navigator.language||"en").slice(0,2);
+  I18N.set(LANGS.includes(saved)?saved:LANGS.includes(nav)?nav:"en");applyLang()})();
+addEventListener("error",e=>fatal(e.message||"Unexpected error"));
+addEventListener("unhandledrejection",e=>fatal(String(e.reason)));
+setTimeout(boot,0);
+})();
+</script>
+<script>
+/* Offline support: only registers over http(s) (not file://) */
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+</script>
+</body>
+</html>
